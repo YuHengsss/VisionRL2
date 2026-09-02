@@ -1,0 +1,28 @@
+# Environment used for all Qwen3.5 (4B / 9B) training and evaluation in the paper.
+# Python 3.10, CUDA 12.6.
+torch==2.7.0
+torchvision==0.22.0
+transformers==5.6.2
+accelerate==1.13.0
+deepspeed==0.18.2
+safetensors==0.7.0
+peft==0.18.1
+datasets==4.6.1
+numpy==2.2.6
+pillow==12.1.1
+scipy==1.15.3
+scikit-image==0.25.2
+tensorboard==2.20.0
+sentencepiece==0.2.1
+tiktoken==0.12.0
+qwen-vl-utils==0.0.14
+triton==3.3.0
+# Qwen3.5 hybrid attention kernels
+flash-linear-attention==0.5.0
+causal-conv1d==1.6.1
+# attention backend (prebuilt wheels: https://github.com/Dao-AILab/flash-attention/releases)
+flash-attn==2.8.3
+# main-protocol judging (scripts/judge)
+mathruler==0.1.0
+openai==2.26.0
+# evaluation framework (bundled fork): pip install -e lmms-eval
