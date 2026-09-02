@@ -5,7 +5,7 @@ block training/eval with locally prepared data + checkpoints.
 
 ## 1. Data release (HF)
 - [ ] Upload the RL pools + evidence-map caches (3 x 7k rows; jsonl ~4-8 MB each,
-      `ev_maps_cache_*` ~54 MB each) and make `train_rl.sh` default paths point at them:
+      `ev_maps_cache_*` ~54 MB each) and make the `scripts/train_rl_*.sh` default paths point at them:
       `filtered_v2_evmaps_4b.jsonl`, `filtered_v2_evmaps_9b.jsonl`,
       `filtered_v2_evmaps_q25_7b_ordered.jsonl` (+ `ev_maps_cache_{4b,9b,q25_7b}/`).
 - [ ] Upload the SD-RPN online-training corpora `qwen35_{4b,9b}_vcot50k_MIX.jsonl` (58 MB each)
@@ -28,16 +28,6 @@ block training/eval with locally prepared data + checkpoints.
 - [ ] Decide whether to publish twig-only deltas (`tools/compress_twig.py` format, ~0.6-1.4 GB)
       plus a loader, or full checkpoints.
 - [ ] Fill the checkpoint table in README with the HF ids.
-
-## 2b. Main-protocol judge dependencies
-- [ ] `scripts/judge/` converts generations into Vision-OPD's `model_answer` layout and scores with
-      their `cal_acc.py`; it needs the Vision-OPD repo's `eval/` dir (prepared benchmark jsons) via
-      `VOPD_EVAL_DIR`. Decide: vendor the four benchmark jsons (V*, ZoomBench, HR-4K/8K) under
-      `scripts/judge/third_party/` or document cloning Vision-OPD.
-- [ ] `scripts/judge/drivers/` and `zwz_judge_api.py` are the archived competitor-row drivers
-      (CityU absolute paths); keep as provenance or drop.
-- [ ] `run_judge.sh` was assembled from the CityU drivers and has NOT been executed end-to-end on
-      a fresh machine yet.
 
 ## 3. Demo
 - [ ] Gradio RoI visualizer (`qzoom_demo/launch_compare.sh` in the research tree) — port to the
@@ -62,6 +52,12 @@ block training/eval with locally prepared data + checkpoints.
       sdpa run-to-run nondeterminism flips components; the env is unchanged since July apart
       from `mathruler`) -> not a release-code effect. Full-run reproduction therefore has to be judged on the final eval numbers, not
       on step-wise curves.
-- [ ] Main-protocol reproduction end-to-end through `scripts/judge/run_judge.sh` (needs
-      `VOPD_EVAL_DIR`); not yet run from the release tree.
+- [x] 2026-09-02 `scripts/main_table_judge.py` (single-file port of the unified-judge-v1 pipeline,
+      in-process Qwen3.5-9B) validated on the paper's own 4B generation logs: V* 91.62 vs 91.10
+      (1 of 191 items, an LLM-judge verdict), ZoomBench 65.21 vs 65.09 (1 of 845). The judge
+      question is rebuilt in Vision-OPD's format (V* only differs; verified identical on all 191
+      queries) - without that, 5 V* verdicts flip.
+- [x] 2026-09-02 thin per-model launcher (`scripts/train_rl_qwen3_5_4b.sh`, constants hard-wired
+      in the trainer): 4-step smoke identical to the research trainer.
+- [ ] Main-protocol generation end-to-end through `scripts/main_eval.sh` from the release tree.
 - [ ] Stage-1 (`train_sdrpn_online.sh`) smoke run from the release tree.
