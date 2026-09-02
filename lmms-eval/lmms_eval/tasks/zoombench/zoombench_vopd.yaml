@@ -1,0 +1,32 @@
+dataset_path: inclusionAI/ZoomBench
+dataset_kwargs:
+  token: True
+task: "zoombench_vopd"
+test_split: test
+output_type: generate_until
+doc_to_visual: !function utils.zoombench_doc_to_visual
+doc_to_text: !function utils.zoombench_doc_to_text_vopd
+doc_to_target: "response"
+
+generation_kwargs:
+  max_new_tokens: 2048
+  temperature: 0
+  top_p: 1.0
+  num_beams: 1
+  do_sample: false
+
+process_results: !function utils.zoombench_process_results
+
+metric_list:
+  - metric: zoombench_acc
+    aggregation: !function utils.zoombench_aggregate_overall
+    higher_is_better: true
+  - metric: zoombench_mcq_acc
+    aggregation: !function utils.zoombench_aggregate_mcq
+    higher_is_better: true
+  - metric: zoombench_blank_acc
+    aggregation: !function utils.zoombench_aggregate_blank
+    higher_is_better: true
+
+metadata:
+  - version: 0.0

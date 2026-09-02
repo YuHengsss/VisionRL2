@@ -1,0 +1,15 @@
+_import/
+output/
+logs/
+data/
+datasets/
+__pycache__/
+*.pyc
+*.egg-info/
+*.safetensors
+*.bin
+*.pt
+*.pkl
+.DS_Store
+.idea/
+.vscode/

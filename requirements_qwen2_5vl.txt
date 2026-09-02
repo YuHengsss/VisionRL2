@@ -1,0 +1,23 @@
+# Environment used for the Qwen2.5-VL-7B experiments (older transformers).
+# Python 3.10, CUDA 12.1.
+torch==2.4.0
+torchvision==0.19.0
+transformers==4.51.3
+accelerate==1.4.0
+deepspeed==0.18.2
+safetensors==0.6.2
+peft==0.17.1
+datasets==4.0.0
+numpy==2.2.6
+pillow==11.3.0
+scipy==1.15.3
+scikit-image==0.25.2
+tensorboard==2.20.0
+sentencepiece==0.2.1
+tiktoken==0.11.0
+qwen-vl-utils==0.0.10
+triton==3.0.0
+flash-attn==2.7.4.post1
+mathruler==0.1.0
+openai==1.101.0
+# evaluation framework (bundled fork): pip install -e lmms-eval
