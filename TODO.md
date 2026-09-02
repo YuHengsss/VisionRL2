@@ -54,6 +54,14 @@ block training/eval with locally prepared data + checkpoints.
       loss_anchor_k1 / K / n_actions / supp_n / winnability_w identical at every step.
 - [x] 2026-09-02 Eval reproduction (training-aligned @576, 4B RL checkpoint, release `eval.sh`):
       V* 85.34, ZoomBench 61.78 = the paper cells (85.34 / 61.78).
+- [x] 2026-09-02 Loss-curve check vs the ORIGINAL 4B RL run (`q35vl-4b-v4pa-placebo125-s42`,
+      TensorBoard, 2026-07-24), identical launch (4 GPUs x bs 8, full pool, seed 42), 25 steps:
+      release trainer == research trainer run today at every step (max |diff| = 0.0 on loss /
+      reward_mean / loss_policy / loss_kl). Both match the July log exactly at steps 1-2 and
+      then diverge identically from step 3 (region gating is discontinuous, so bf16 + ZeRO-2 +
+      sdpa run-to-run nondeterminism flips components; the env is unchanged since July apart
+      from `mathruler`) -> not a release-code effect. Full-run reproduction therefore has to be judged on the final eval numbers, not
+      on step-wise curves.
 - [ ] Main-protocol reproduction end-to-end through `scripts/judge/run_judge.sh` (needs
       `VOPD_EVAL_DIR`); not yet run from the release tree.
 - [ ] Stage-1 (`train_sdrpn_online.sh`) smoke run from the release tree.
