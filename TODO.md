@@ -61,3 +61,8 @@ block training/eval with locally prepared data + checkpoints.
       in the trainer): 4-step smoke identical to the research trainer.
 - [ ] Main-protocol generation end-to-end through `scripts/main_eval.sh` from the release tree.
 - [ ] Stage-1 (`train_sdrpn_online.sh`) smoke run from the release tree.
+
+## Project page (project_page/)
+- [ ] Fill authors / affiliations / arXiv / BibTeX before release (`TODO(release)` in index.html)
+- [ ] Replace "coming soon" checkpoint cells with HF links
+- [ ] Enable GitHub Pages (main / project_page) when the repo goes public
