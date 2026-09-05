@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Vision-RL²: region-level policy optimization for fine-grained MLLM perception. A lightweight RoI predictor is trained with region-level reinforcement learning from a frozen MLLM reader, then paired with sparse visual encoding.">
+<meta name="keywords" content="Vision-RL2, region-level reinforcement learning, MLLM, fine-grained perception, RoI, SD-RPN, Qwen3.5, Qwen2.5-VL, visual token efficiency">
+<meta property="og:title" content="Region-Level Policy Optimization for Fine-grained MLLM Perception">
+<meta property="og:description" content="Localization tolerates 3–4× stronger token compression than recognition. Vision-RL² trains an RoI predictor with region-level RL from a frozen reader and beats the base model at every token budget.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="assets/teaser_all.png">
+<meta name="twitter:card" content="summary_large_image">
+<title>Vision-RL²: Region-Level Policy Optimization for Fine-grained MLLM Perception</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%232563eb'/%3E%3Ctext x='50' y='64' font-family='system-ui' font-size='46' font-weight='800' text-anchor='middle' fill='white'%3ERL%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=Noto+Sans:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/rlstep.css">
+</head>
+<body data-lang="en">
+
+<div class="project-nav" aria-label="Section navigation">
+  <a class="project-nav-link" href="#overview"><span class="lang-en">Overview</span><span class="lang-zh">概览</span></a>
+  <a class="project-nav-link" href="#method"><span class="lang-en">Method</span><span class="lang-zh">方法</span></a>
+  <a class="project-nav-link" href="#live"><span class="lang-en">Live training step</span><span class="lang-zh">训练步骤演示</span></a>
+  <a class="project-nav-link" href="#results"><span class="lang-en">Results</span><span class="lang-zh">结果</span></a>
+  <a class="project-nav-link" href="#checkpoints"><span class="lang-en">Checkpoints</span><span class="lang-zh">模型权重</span></a>
+  <a class="project-nav-link" href="#bibtex"><span class="lang-en">Citation</span><span class="lang-zh">引用</span></a>
+  <div class="lang-toggle" role="group" aria-label="Language">
+    <button type="button" id="lang-btn-en" class="active" onclick="setLang('en')">EN</button>
+    <button type="button" id="lang-btn-zh" onclick="setLang('zh')">中文</button>
+  </div>
+</div>
+
+<!-- ============================== HERO ============================== -->
+<section class="hero is-light">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered hero-panel">
+          <h1 class="title is-2 publication-title">
+            <span class="lang-en">Region-Level Policy Optimization<br>for Fine-grained MLLM Perception</span>
+            <span class="lang-zh">面向细粒度多模态感知的<br>区域级策略优化</span>
+          </h1>
+          <p class="subtitle is-5" style="margin-top:0.6rem;">
+            <span class="lang-en"><strong>Vision-RL²</strong>: train the RoI predictor with region-level reinforcement learning from a frozen MLLM reader</span>
+            <span class="lang-zh"><strong>Vision-RL²</strong>：用冻结的多模态大模型作为“阅读器”，以区域级强化学习训练 RoI 预测器</span>
+          </p>
+
+          <!-- TODO(release): fill in authors / affiliations before the page goes public -->
+          <div class="publication-authors">
+            <span class="author-block"><span class="lang-en">Authors to be announced</span><span class="lang-zh">作者信息待公开</span></span>
+          </div>
+          <div class="publication-affiliations">
+            <span class="lang-en">Under review as a conference paper at ICLR 2027</span>
+            <span class="lang-zh">ICLR 2027 在审论文</span>
+          </div>
+
+          <div class="publication-links">
+            <span class="link-block">
+              <a href="#" class="external-link button is-normal is-rounded is-dark" title="arXiv link will be added at release">
+                <span class="icon"><i class="ai ai-arxiv"></i></span><span>arXiv</span>
+              </a>
+            </span>
+            <span class="link-block">
+              <a href="https://github.com/YuHengsss/VisionRL2" class="external-link button is-normal is-rounded is-dark">
+                <span class="icon"><i class="fab fa-github"></i></span>
+                <span><span class="lang-en">Code</span><span class="lang-zh">代码</span></span>
+              </a>
+            </span>
+            <span class="link-block">
+              <a href="#checkpoints" class="external-link button is-normal is-rounded is-dark">
+                <span class="icon">🤗</span>
+                <span><span class="lang-en">Models</span><span class="lang-zh">模型</span></span>
+              </a>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== OVERVIEW ============================== -->
+<section class="section" id="overview" style="padding-top: 1rem;">
+  <div class="container is-max-desktop section-surface">
+    <h2 class="title is-3 section-title">
+      <span class="lang-en">Overview</span><span class="lang-zh">概览</span>
+    </h2>
+
+    <div class="content">
+      <p class="lang-en">
+        Fine-grained perception in multimodal large language models (MLLMs) is usually bought with resolution, and every
+        extra visual token is paid twice, in the vision encoder and in the language model. We start from a measurement:
+        the two operations behind fine-grained perception, <em>localizing</em> the region of interest (RoI) and
+        <em>recognizing</em> its content, do not need the same resolution. In a controlled diagnostic on ZoomBench,
+        localization tolerates roughly <strong>3–4× stronger token compression</strong> than recognition. That asymmetry
+        motivates localizing from a coarse view and spending resolution only on the selected evidence, which puts the burden
+        on the RoI predictor.
+      </p>
+      <p class="lang-zh">
+        多模态大模型（MLLM）的细粒度感知通常靠“堆分辨率”换来，而每一个额外的视觉 token 都要在视觉编码器和语言模型里各付一次代价。
+        我们从一个测量出发：细粒度感知背后的两步操作，<em>定位</em>感兴趣区域（RoI）和<em>识别</em>其内容，对分辨率的需求并不相同。
+        在 ZoomBench 上的受控诊断中，定位能承受比识别<strong>高出约 3–4 倍的 token 压缩</strong>。这一不对称性意味着可以在粗视图上定位，
+        只把分辨率花在被选中的证据上，于是压力落到了 RoI 预测器身上。
+      </p>
+      <p class="lang-en">
+        Existing predictors trade one thing for another. Decoding box coordinates with the MLLM can be trained from answers but costs a full model
+        pass per query. A lightweight proposal network distilled from the model's attention (SD-RPN) is fast but inherits the noise of its attention
+        targets and is never checked against the answer. Because the RoI carries no annotation and reaches the answer only through a discrete region
+        choice, we optimize the proposal network with <strong>region-level reinforcement learning</strong>: coherent regions are actions, and a frozen
+        MLLM reader scores each one by how its removal changes the answer likelihood. A subtractive objective prunes distracting proposals, an additive
+        objective recovers missed evidence, and only the small predictor is updated. At inference, a <strong>sparse visual encoding</strong> magnifies the
+        evidence and drops background tokens.
+      </p>
+      <p class="lang-zh">
+        现有的预测器各有取舍。让 MLLM 直接解码框坐标可以由答案端到端训练，但每个问题都要付出一次完整的模型前向；从模型注意力蒸馏出的轻量提议网络（SD-RPN）
+        速度快，却继承了注意力目标的噪声，而且从未用答案来校验。由于 RoI 没有标注、又只能通过离散的区域选择影响答案，我们用<strong>区域级强化学习</strong>来优化提议网络：
+        把连通区域当作动作，用冻结的 MLLM 阅读器衡量“去掉这个区域后答案似然变化多少”。减法目标剪掉干扰提议，加法目标找回遗漏证据，只更新小预测器。
+        推理时，<strong>稀疏视觉编码</strong>放大证据并丢弃背景 token。
+      </p>
+    </div>
+
+    <div class="figure-block teaser-figure">
+      <img src="assets/teaser_all.png" alt="Teaser: localization vs recognition compression tolerance, token efficiency, and method overview">
+      <p class="caption">
+        <span class="lang-en">(a) The box is still re-predicted correctly at 25× token reduction, while reading the crop already fails at 9×.
+          (b) Population survival under scene vs. crop compression. (c) Coarse localization with sparse reading matches the dense SD-RPN pipeline with 4.2× fewer visual tokens (Qwen3.5-4B).
+          (d) Vision-RL²: the RPN proposes regions, a frozen reader scores each region's contribution to the answer, and the reward updates the RPN.</span>
+        <span class="lang-zh">(a) token 压缩 25 倍时框仍能被正确重预测，而读裁剪区在 9 倍压缩时已经失败。(b) 分别压缩“场景”与“裁剪区”时的样本存活率。
+          (c) 粗定位加稀疏读取，用少 4.2 倍的视觉 token 达到稠密 SD-RPN 流程的精度（Qwen3.5-4B）。(d) Vision-RL²：RPN 提出区域，冻结阅读器为每个区域评分，奖励更新 RPN。</span>
+      </p>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat"><div class="num">3–4×</div><div class="label"><span class="lang-en">more compression tolerated by localization than recognition</span><span class="lang-zh">定位比识别多承受的 token 压缩倍数</span></div></div>
+      <div class="stat"><div class="num">+3.0</div><div class="label"><span class="lang-en">six-benchmark average from region-level RL alone (Qwen3.5-4B)</span><span class="lang-zh">仅靠区域级 RL 带来的六基准平均提升（Qwen3.5-4B）</span></div></div>
+      <div class="stat"><div class="num">4.2×</div><div class="label"><span class="lang-en">fewer visual tokens at the same accuracy as SD-RPN</span><span class="lang-zh">与 SD-RPN 同精度下节省的视觉 token 倍数</span></div></div>
+      <div class="stat"><div class="num">80.1</div><div class="label"><span class="lang-en">main-table average of Vision-RL² 9B, ahead of Gemini-3.1-Pro and Vision-OPD-9B</span><span class="lang-zh">Vision-RL² 9B 的主表平均分，高于 Gemini-3.1-Pro 与 Vision-OPD-9B</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== METHOD ============================== -->
+<section class="section" id="method">
+  <div class="container is-max-desktop section-surface">
+    <h2 class="title is-3 section-title">
+      <span class="lang-en">Method</span><span class="lang-zh">方法</span>
+    </h2>
+
+    <div class="content">
+      <h3><span class="lang-en">Regions as actions, a frozen reader as the critic</span><span class="lang-zh">区域即动作，冻结阅读器即评判</span></h3>
+      <p class="lang-en">
+        The predictor is SD-RPN: three trainable blocks attached after block <em>K</em> of the frozen MLLM, producing a dense RoI map
+        <em>P<sub>θ</sub></em> from the last prefilling token in a single pass. Vision-RL² keeps this interface and replaces its training signal.
+        The map is smoothed, binarized at a peak-relative threshold, and split into connected components; the top-<em>K</em> components are the
+        <strong>regions</strong> <em>R<sub>1</sub>…R<sub>K</sub></em>. A mask renders a set of retained regions into a masked image, and the
+        <strong>functional score</strong> <em>h<sub>φ</sub>(M)</em> is the log-odds of the gold answer under a frozen reader (the MLLM itself) that sees
+        only the masked image. A region's <strong>contribution</strong> is the leave-one-out drop
+        <em>Δ<sub>k</sub> = h<sub>φ</sub>(M) − h<sub>φ</sub>(M ⊖ R<sub>k</sub>)</em>, clipped to ±5, and <em>n</em> regions cost only <em>n</em>+1 reader passes.
+      </p>
+      <p class="lang-zh">
+        预测器是 SD-RPN：在冻结 MLLM 的第 <em>K</em> 层之后接三个可训练模块，由最后一个 prefill token 一次前向得到稠密 RoI 图 <em>P<sub>θ</sub></em>。
+        Vision-RL² 保留这一接口，只替换训练信号。RoI 图经平滑、按峰值相对阈值二值化、再拆分为连通分量，取前 <em>K</em> 个分量作为<strong>区域</strong>
+        <em>R<sub>1</sub>…R<sub>K</sub></em>。掩码把保留的区域集合渲染成掩码图像，<strong>功能得分</strong> <em>h<sub>φ</sub>(M)</em> 是冻结阅读器（即 MLLM 本身）只看掩码图像时，
+        标准答案的对数几率。一个区域的<strong>贡献</strong>是留一法的下降量 <em>Δ<sub>k</sub> = h<sub>φ</sub>(M) − h<sub>φ</sub>(M ⊖ R<sub>k</sub>)</em>（裁剪到 ±5），
+        <em>n</em> 个区域只需 <em>n</em>+1 次阅读器前向。
+      </p>
+    </div>
+
+    <div class="figure-block">
+      <img src="assets/method_overview.png" alt="Overview of region-level RL: regions, masked images, reader scores, margin, advantages">
+      <p class="caption">
+        <span class="lang-en">One training step. Predicted regions <em>R<sub>1</sub>…R<sub>4</sub></em> and control regions are extracted from the RoI map; the frozen reader scores each
+          action's masked image; contributions <em>Δ<sub>k</sub></em> and the margin <em>b</em> form the advantages and the policy loss.</span>
+        <span class="lang-zh">一个训练步骤。从 RoI 图中提取预测区域 <em>R<sub>1</sub>…R<sub>4</sub></em> 与对照区域；冻结阅读器为每个动作的掩码图像评分；贡献 <em>Δ<sub>k</sub></em> 与阈值 <em>b</em> 构成优势与策略损失。</span>
+      </p>
+    </div>
+
+    <div class="columns is-centered" style="align-items: stretch;">
+      <div class="column stage-card">
+        <div class="content">
+          <h4 class="title is-5"><span class="lang-en">Subtractive group</span><span class="lang-zh">减法组</span></h4>
+          <p class="lang-en">Each predicted region is removed in turn. Small likelihood changes happen even for irrelevant removals, so two <strong>control regions</strong> grown in low-evidence areas set a sample-specific noise margin <em>b</em>. A region whose contribution beats <em>b</em> receives negative credit for its removal and is preserved; otherwise its confidence is lowered. Removals compete under a softmax removal policy, so credit for removing one region reinforces keeping the others.</p>
+          <p class="lang-zh">依次移除每个预测区域。即使移除的是无关区域，似然也会有小幅波动，因此在低证据区生长两个<strong>对照区域</strong>，得到样本特定的噪声阈值 <em>b</em>。贡献超过 <em>b</em> 的区域，其“移除”动作获得负优势从而被保留；否则降低其置信度。各移除动作在 softmax 移除策略下相互竞争，移除某一区域的信用会反过来强化保留其余区域。</p>
+        </div>
+      </div>
+      <div class="column stage-card">
+        <div class="content">
+          <h4 class="title is-5"><span class="lang-en">Additive group</span><span class="lang-zh">加法组</span></h4>
+          <p class="lang-en">Removal cannot recover evidence the policy never proposed. Frozen response-to-image attention maps from six MLLM layers propose <strong>supplementary regions</strong> outside the prediction. Each is scored by its leave-one-out contribution against the augmented mask; a positive contribution raises the region in the RoI map through its mean inclusion log-likelihood, a negative one suppresses it. No margin is needed here, because exclusion is already the zero-gradient default.</p>
+          <p class="lang-zh">移除无法找回策略从未提出的证据。来自 MLLM 六个层的冻结“回答到图像”注意力图，在预测区域之外提出<strong>补充区域</strong>。每个补充区域按其相对增广掩码的留一贡献评分：贡献为正则通过区域内的平均包含对数似然抬高 RoI 图，为负则压制。这里不需要阈值，因为“不包含”本就是零梯度的默认状态。</p>
+        </div>
+      </div>
+      <div class="column stage-card">
+        <div class="content">
+          <h4 class="title is-5"><span class="lang-en">Anchors and objective</span><span class="lang-zh">锚定项与总目标</span></h4>
+          <p class="lang-en">Both policy losses are scaled by a detached attainability weight (samples the reader cannot answer under any mask contribute little), a KL anchor to the initial SD-RPN keeps the map from drifting, and a BCE anchor handles single-region samples. Only the predictor is trained; the MLLM stays frozen. Inference is unchanged: one answer-free RoI prediction before decoding.</p>
+          <p class="lang-zh">两个策略损失都乘以一个不回传梯度的“可达性”权重（阅读器在任何掩码下都答不出的样本贡献很小），对初始 SD-RPN 的 KL 锚定项防止 RoI 图漂移，BCE 锚定项处理只有单个区域的样本。只训练预测器，MLLM 保持冻结。推理不变：解码前只做一次无需答案的 RoI 预测。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="content" style="margin-top:1.4rem;">
+      <h3><span class="lang-en">Sparse visual encoding</span><span class="lang-zh">稀疏视觉编码</span></h3>
+      <p class="lang-en">
+        At inference the trained predictor enables a simple principle: spend the visual-token budget on evidence, not on area. We take the bounding box of the
+        predicted foreground, measure its foreground occupancy <em>ρ<sub>fg</sub></em>, and re-encode the crop at zoom <em>η = min(√(1/ρ<sub>fg</sub>), η<sub>max</sub>)</em>,
+        keeping only the tokens inside the foreground. Position embeddings are assigned on the full crop grid before background tokens are dropped, so the
+        sparse token set is positionally indistinguishable from a dense encoding of the same crop, while the evidence is seen at <em>η</em>× finer resolution
+        under the same budget. Source tokens are not re-encoded; their KV cache is reused.
+      </p>
+      <p class="lang-zh">
+        推理时，训练好的预测器让一个简单原则成为可能：把视觉 token 预算花在证据上，而不是花在面积上。取预测前景的外接框，测量其前景占比 <em>ρ<sub>fg</sub></em>，
+        以缩放倍率 <em>η = min(√(1/ρ<sub>fg</sub>), η<sub>max</sub>)</em> 重新编码裁剪区，只保留前景内的 token。位置编码在丢弃背景 token 之前按完整裁剪网格分配，
+        因此稀疏 token 集在位置上与同一裁剪区的稠密编码无法区分，而证据在相同预算下以 <em>η</em> 倍更精细的分辨率被看到。源图 token 不重新编码，复用其 KV 缓存。
+      </p>
+    </div>
+    <div class="figure-block" style="max-width:640px; margin-left:auto; margin-right:auto;">
+      <img src="assets/SparseEncoding.png" alt="Sparse visual encoding">
+      <p class="caption">
+        <span class="lang-en">A dense crop spends the budget uniformly over the bbox; the sparse crop encodes only foreground tokens at <em>η</em>× finer resolution.</span>
+        <span class="lang-zh">稠密裁剪把预算均匀地花在外接框上；稀疏裁剪只编码前景 token，且分辨率高出 <em>η</em> 倍。</span>
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== LIVE TRAINING STEP ============================== -->
+<section class="section" id="live" style="background:#fafbfc;">
+  <div class="container is-max-desktop section-surface">
+    <h2 class="title is-3 section-title">
+      <span class="lang-en">One training step, with real numbers</span><span class="lang-zh">一个真实的训练步骤</span>
+    </h2>
+    <div class="content">
+      <p class="lang-en">
+        The overview figure is static; this is the same procedure run on real training samples with the released code and the SD-RPN
+        initialization of Qwen3.5-4B. Every number below comes from the frozen reader on that sample. Step through the six stages, or let it play.
+      </p>
+      <p class="lang-zh">
+        概览图是静态的；这里用发布的代码和 Qwen3.5-4B 的 SD-RPN 初始化，在真实训练样本上跑同一套流程。下面的每个数字都来自该样本上的冻结阅读器。可以逐步查看六个阶段，也可以自动播放。
+      </p>
+    </div>
+    <div id="rlstep-app" class="rlstep">
+      <div class="rlstep-loading"><span class="lang-en">Loading cases…</span><span class="lang-zh">正在加载样例…</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== RESULTS ============================== -->
+<section class="section" id="results">
+  <div class="container is-max-desktop section-surface">
+    <h2 class="title is-3 section-title">
+      <span class="lang-en">Results</span><span class="lang-zh">结果</span>
+    </h2>
+
+    <div class="content">
+      <h3><span class="lang-en">Main comparison</span><span class="lang-zh">主结果对比</span></h3>
+      <p class="lang-en">All methods share a 16,384 source-image token limit, produce free-form responses, and are scored by rule-based parsing with an LLM judge for the remaining cases. Base-model and Vision-OPD / ZwZ rows are re-evaluated on released weights; other rows are quoted from their publications.</p>
+      <p class="lang-zh">所有方法共享 16,384 的源图 token 上限，自由生成回答，先用规则解析、剩余情况交给 LLM 评判。基础模型与 Vision-OPD / ZwZ 行基于公开权重复测，其余行引自原论文。</p>
+    </div>
+    <div class="table-container">
+      <table class="table is-narrow is-hoverable results-table">
+        <thead>
+          <tr><th><span class="lang-en">Model</span><span class="lang-zh">模型</span></th><th>Size</th><th>V* Bench</th><th>ZoomBench</th><th>HR-Bench 4K</th><th>HR-Bench 8K</th><th>MME-RW EN</th><th>MME-RW CN</th><th><span class="lang-en">Average</span><span class="lang-zh">平均</span></th></tr>
+        </thead>
+        <tbody>
+          <tr class="group-row"><td colspan="9"><span class="lang-en">Large-scale open / closed-source models</span><span class="lang-zh">大规模开源 / 闭源模型</span></td></tr>
+          <tr><td>GPT-5.4</td><td>—</td><td>77.0</td><td>52.7</td><td>84.0</td><td>77.9</td><td>74.2</td><td>70.9</td><td>72.8</td></tr>
+          <tr><td>Gemini-3.1-Pro</td><td>—</td><td>88.0</td><td>61.2</td><td>89.6</td><td>86.9</td><td>76.5</td><td>73.3</td><td>79.3</td></tr>
+          <tr><td>Qwen3-VL-Instruct</td><td>235B</td><td>91.1</td><td>56.1</td><td>86.1</td><td>80.4</td><td>71.7</td><td>69.0</td><td>75.8</td></tr>
+          <tr><td>Qwen3.5</td><td>397B</td><td>88.0</td><td>57.2</td><td>89.4</td><td>85.5</td><td>74.8</td><td>69.8</td><td>77.4</td></tr>
+          <tr><td>Kimi-K2.6</td><td>1T</td><td>88.5</td><td>53.1</td><td>81.9</td><td>78.0</td><td>69.2</td><td>66.1</td><td>72.8</td></tr>
+          <tr class="group-row"><td colspan="9"><span class="lang-en">Qwen2.5-VL based</span><span class="lang-zh">基于 Qwen2.5-VL</span></td></tr>
+          <tr><td>DeepEyes</td><td>7B</td><td>85.9</td><td>46.5</td><td>75.1</td><td>72.6</td><td>64.1</td><td>64.1</td><td>68.1</td></tr>
+          <tr><td>Thyme</td><td>7B</td><td>82.2</td><td>45.1</td><td>77.0</td><td>72.0</td><td>64.8</td><td>64.6</td><td>67.6</td></tr>
+          <tr><td>DeepEyesV2</td><td>7B</td><td>81.7</td><td>45.0</td><td>77.9</td><td>73.8</td><td>64.9</td><td>65.1</td><td>68.0</td></tr>
+          <tr><td>ZwZ</td><td>7B</td><td>86.9</td><td>55.6</td><td>75.9</td><td>72.4</td><td>65.0</td><td>63.5</td><td>69.9</td></tr>
+          <tr class="ours-row"><td>Vision-RL² (ours)</td><td>7B</td><td>91.6</td><td>59.8</td><td>78.8</td><td>75.0</td><td>62.2</td><td>58.7</td><td>71.0</td></tr>
+          <tr class="group-row"><td colspan="9"><span class="lang-en">Qwen3-VL based</span><span class="lang-zh">基于 Qwen3-VL</span></td></tr>
+          <tr><td>Qwen3-VL-Instruct</td><td>8B</td><td>84.8</td><td>43.0</td><td>79.6</td><td>75.3</td><td>63.2</td><td>64.6</td><td>68.4</td></tr>
+          <tr><td>ZwZ</td><td>8B</td><td>90.6</td><td>58.0</td><td>84.4</td><td>81.6</td><td>69.9</td><td>69.2</td><td>75.6</td></tr>
+          <tr><td>P2R</td><td>4B</td><td>93.2</td><td>–</td><td>81.9</td><td>80.5</td><td>–</td><td>–</td><td>–</td></tr>
+          <tr><td>P2R</td><td>8B</td><td>93.7</td><td>–</td><td>81.5</td><td>82.6</td><td>–</td><td>–</td><td>–</td></tr>
+          <tr class="group-row"><td colspan="9"><span class="lang-en">Qwen3.5 based</span><span class="lang-zh">基于 Qwen3.5</span></td></tr>
+          <tr><td>Qwen3.5</td><td>4B</td><td>85.9</td><td>51.5</td><td>83.6</td><td>80.1</td><td>59.1</td><td>60.6</td><td>70.1</td></tr>
+          <tr><td>Qwen3.5</td><td>9B</td><td>83.8</td><td>54.9</td><td>84.9</td><td>83.5</td><td>72.5</td><td>67.9</td><td>74.6</td></tr>
+          <tr><td>Vision-OPD</td><td>4B</td><td>90.6</td><td>59.5</td><td>82.0</td><td>79.1</td><td>74.2</td><td>70.6</td><td>76.0</td></tr>
+          <tr><td>Vision-OPD</td><td>9B</td><td>90.6</td><td>65.1</td><td>87.1</td><td>85.6</td><td>73.2</td><td>70.3</td><td>78.7</td></tr>
+          <tr class="ours-row"><td>Vision-RL² (ours)</td><td>4B</td><td>91.1</td><td>65.1</td><td>84.3</td><td>80.3</td><td>65.8</td><td>65.3</td><td>75.3</td></tr>
+          <tr class="ours-row"><td>Vision-RL² (ours)</td><td>9B</td><td><strong>95.3</strong></td><td><strong>68.4</strong></td><td>86.8</td><td>86.1</td><td>73.4</td><td>70.6</td><td><strong>80.1</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="content lang-en" style="margin-top:0.6rem;">A key distinction is the trainable parameter budget: DeepEyes, ZwZ, P2R, and Vision-OPD fine-tune the full MLLM, whereas Vision-RL² updates only the small attached predictor. The 9B model still attains the highest average in the table, with the best V* Bench and ZoomBench scores overall.</p>
+    <p class="content lang-zh" style="margin-top:0.6rem;">一个关键区别是可训练参数量：DeepEyes、ZwZ、P2R 与 Vision-OPD 都微调整个 MLLM，而 Vision-RL² 只更新附加的小预测器。即便如此，9B 模型仍取得表中最高的平均分，并在 V* Bench 与 ZoomBench 上全表最佳。</p>
+
+    <div class="content" style="margin-top:1.6rem;">
+      <h3><span class="lang-en">Accuracy versus tokens and latency</span><span class="lang-zh">精度 vs. token 数与延迟</span></h3>
+      <p class="lang-en">Under the training-aligned short-answer protocol, our model lies above the base model, SD-RPN, and Vision-OPD at every source-image token limit from 576 to 4,096. At the 576 limit it exceeds the base model at 4,096 by more than three points with about a quarter of the tokens, and it matches SD-RPN at 4,096 with 4.2× fewer visual tokens (4B). The routing head adds three blocks on the answer call's own prefill and routes in 31–49 ms, roughly 30× cheaper than attention routing or coordinate decoding.</p>
+      <p class="lang-zh">在与训练对齐的短答案协议下，我们的模型在 576 到 4,096 的每个源图 token 上限都高于基础模型、SD-RPN 与 Vision-OPD。576 上限时以约四分之一的 token 超过基础模型在 4,096 上限的精度三分以上，并以少 4.2 倍的视觉 token 追平 SD-RPN 在 4,096 时的精度（4B）。路由头只在回答调用自身的 prefill 上增加三个模块，31–49 ms 完成路由，比注意力路由或坐标解码便宜约 30 倍。</p>
+    </div>
+    <div class="figure-block">
+      <img src="assets/tradeoff_main.png" alt="Six-benchmark average vs visual tokens and latency">
+      <p class="caption"><span class="lang-en">Six-benchmark average versus visual tokens per sample (left of each pair) and end-to-end latency (right), Qwen3.5-4B and 9B.</span><span class="lang-zh">六基准平均分 vs. 每样本视觉 token 数（每组左图）与端到端延迟（右图），Qwen3.5-4B 与 9B。</span></p>
+    </div>
+    <div class="columns is-centered">
+      <div class="column is-half">
+        <div class="figure-block">
+          <img src="assets/routing_bars.png" alt="Latency decomposition of routing interfaces">
+          <p class="caption"><span class="lang-en">Latency decomposition of two-stage routing at the 4,096-token limit; accuracy above each bar.</span><span class="lang-zh">4,096 token 上限下两阶段路由的延迟分解；柱顶为精度。</span></p>
+        </div>
+      </div>
+      <div class="column is-half">
+        <div class="figure-block">
+          <img src="assets/pruning_trend.png" alt="Comparison with visual token pruning">
+          <p class="caption"><span class="lang-en">Against visual token pruning (VisionZip, DART) on Qwen2.5-VL-7B: suite-average accuracy vs. retained tokens.</span><span class="lang-zh">与视觉 token 剪枝方法（VisionZip、DART）在 Qwen2.5-VL-7B 上的对比：套件平均精度 vs. 保留 token 数。</span></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="content" style="margin-top:1.4rem;">
+      <h3><span class="lang-en">Ablations (Qwen3.5-4B, training-aligned protocol, 576-token limit)</span><span class="lang-zh">消融实验（Qwen3.5-4B，训练对齐协议，576 token 上限）</span></h3>
+    </div>
+    <div class="table-container">
+      <table class="table is-narrow is-hoverable results-table">
+        <thead><tr><th><span class="lang-en">Variant</span><span class="lang-zh">变体</span></th><th>V*</th><th>ZoomBench</th><th>HR-4K</th><th>HR-8K</th><th>MME-RW Lite</th><th>InfoVQA</th><th>Avg.</th><th>Δ</th></tr></thead>
+        <tbody>
+          <tr class="muted-row"><td>Qwen3.5-4B (base)</td><td>66.0</td><td>40.5</td><td>63.5</td><td>56.4</td><td>41.0</td><td>69.8</td><td>56.2</td><td>—</td></tr>
+          <tr class="group-row"><td colspan="9"><span class="lang-en">Mechanism</span><span class="lang-zh">机制</span></td></tr>
+          <tr><td>SD-RPN</td><td>82.7</td><td>55.6</td><td>71.1</td><td>63.3</td><td>48.9</td><td>78.1</td><td>66.6</td><td>−3.0</td></tr>
+          <tr class="ours-row"><td>SD-RPN + region-level RL (full recipe)</td><td>82.2</td><td>58.7</td><td>77.3</td><td>69.1</td><td>50.4</td><td>80.1</td><td>69.6</td><td>—</td></tr>
+          <tr><td>+ sparse visual encoding</td><td><strong>85.3</strong></td><td><strong>61.8</strong></td><td><strong>77.4</strong></td><td><strong>70.9</strong></td><td><strong>51.0</strong></td><td><strong>80.5</strong></td><td><strong>71.1</strong></td><td>+1.5</td></tr>
+          <tr class="group-row"><td colspan="9"><span class="lang-en">Reward: functional score →</span><span class="lang-zh">奖励：功能得分 →</span></td></tr>
+          <tr><td>generation accuracy</td><td>80.6</td><td>53.3</td><td>73.9</td><td>65.1</td><td>50.7</td><td>80.5</td><td>67.3</td><td>−2.3</td></tr>
+          <tr><td>raw log-probability</td><td>81.7</td><td>53.1</td><td>75.8</td><td>67.6</td><td>50.0</td><td>80.4</td><td>68.1</td><td>−1.5</td></tr>
+          <tr class="group-row"><td colspan="9"><span class="lang-en">Actions: singleton removals →</span><span class="lang-zh">动作：单区域移除 →</span></td></tr>
+          <tr><td>singleton + pair removals</td><td>83.3</td><td>56.7</td><td>76.8</td><td>69.8</td><td>51.4</td><td>80.5</td><td>69.7</td><td>+0.1</td></tr>
+          <tr><td>cell-level keep-sets</td><td>84.3</td><td>57.0</td><td>72.9</td><td>65.6</td><td>50.6</td><td>80.2</td><td>68.4</td><td>−1.2</td></tr>
+          <tr class="group-row"><td colspan="9"><span class="lang-en">Credit assignment</span><span class="lang-zh">信用分配</span></td></tr>
+          <tr><td>no control-region margin (κ = 0)</td><td>82.2</td><td>54.2</td><td>76.0</td><td>69.1</td><td>49.7</td><td>79.8</td><td>68.5</td><td>−1.1</td></tr>
+          <tr><td>no additive group</td><td>82.2</td><td>55.6</td><td>75.5</td><td>68.4</td><td>50.1</td><td>80.3</td><td>68.7</td><td>−0.9</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="content" style="margin-top:1.4rem;">
+      <h3><span class="lang-en">Qualitative comparison</span><span class="lang-zh">定性对比</span></h3>
+    </div>
+    <div class="figure-block">
+      <img src="assets/vis_compare.png" alt="RoI predictions of SD-RPN and ours">
+      <p class="caption"><span class="lang-en">RoI predictions of SD-RPN and Vision-RL² on cases where their answers diverge. Dimmed regions are the discarded tokens. SD-RPN scatters probability over irrelevant regions or covers the evidence only partially; after region-level RL the predictor keeps exactly the evidence the answer depends on.</span><span class="lang-zh">在两者答案不同的样例上，SD-RPN 与 Vision-RL² 的 RoI 预测。变暗区域为被丢弃的 token。SD-RPN 把概率散布到无关区域或只覆盖部分证据；经区域级 RL 后，预测器恰好保留答案所依赖的证据。</span></p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== CHECKPOINTS ============================== -->
+<section class="section" id="checkpoints" style="background:#fafbfc;">
+  <div class="container is-max-desktop section-surface">
+    <h2 class="title is-3 section-title">
+      <span class="lang-en">Checkpoints and code</span><span class="lang-zh">模型权重与代码</span>
+    </h2>
+    <div class="content">
+      <p class="lang-en">Training and evaluation code is released in the <a href="https://github.com/YuHengsss/VisionRL2">VisionRL2</a> repository: SD-RPN online pseudo-label training, the region-level RL recipe for the three backbones, and the two evaluation protocols. Model weights and the RL pool will be released on Hugging Face.</p>
+      <p class="lang-zh">训练与评估代码发布在 <a href="https://github.com/YuHengsss/VisionRL2">VisionRL2</a> 仓库：SD-RPN 在线伪标签训练、三个主干的区域级 RL 配方，以及两套评估协议。模型权重与 RL 训练池将在 Hugging Face 发布。</p>
+    </div>
+    <div class="table-container">
+      <table class="table is-narrow results-table">
+        <thead><tr><th><span class="lang-en">Backbone</span><span class="lang-zh">主干</span></th><th>Twig</th><th><span class="lang-en">Trainable params</span><span class="lang-zh">可训练参数</span></th><th><span class="lang-en">Main-table avg.</span><span class="lang-zh">主表平均</span></th><th><span class="lang-en">Weights</span><span class="lang-zh">权重</span></th></tr></thead>
+        <tbody>
+          <tr><td>Qwen3.5-VL-4B</td><td>K = 21, T = 3</td><td><span class="lang-en">predictor only</span><span class="lang-zh">仅预测器</span></td><td>75.3</td><td><span class="lang-en">coming soon</span><span class="lang-zh">即将发布</span></td></tr>
+          <tr><td>Qwen3.5-VL-9B</td><td>K = 21, T = 3</td><td><span class="lang-en">predictor only</span><span class="lang-zh">仅预测器</span></td><td>80.1</td><td><span class="lang-en">coming soon</span><span class="lang-zh">即将发布</span></td></tr>
+          <tr><td>Qwen2.5-VL-7B</td><td>K = 18, T = 3</td><td><span class="lang-en">predictor only</span><span class="lang-zh">仅预测器</span></td><td>71.0</td><td><span class="lang-en">coming soon</span><span class="lang-zh">即将发布</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== BIBTEX ============================== -->
+<section class="section" id="bibtex">
+  <div class="container is-max-desktop section-surface">
+    <h2 class="title is-3 section-title">
+      <span class="lang-en">Citation</span><span class="lang-zh">引用</span>
+    </h2>
+    <div class="bibtex-block"><pre><code>@article{visionrl2_2026,
+  title   = {Region-Level Policy Optimization for Fine-grained MLLM Perception},
+  author  = {To be announced},
+  journal = {arXiv preprint},
+  year    = {2026}
+}</code></pre></div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="content">
+    <p class="lang-en">This page is part of the <a href="https://github.com/YuHengsss/VisionRL2">VisionRL2 release</a>. Built on <a href="https://github.com/QwenLM/Qwen2.5-VL">Qwen2.5-VL</a>, <a href="https://github.com/QwenLM/Qwen3-VL">Qwen3.5-VL</a>, and <a href="https://github.com/EvolvingLMMs-Lab/lmms-eval">lmms-eval</a>. Template adapted from the <a href="https://nerfies.github.io/">Nerfies</a> project page.</p>
+    <p class="lang-zh">本页面属于 <a href="https://github.com/YuHengsss/VisionRL2">VisionRL2 发布内容</a>，基于 <a href="https://github.com/QwenLM/Qwen2.5-VL">Qwen2.5-VL</a>、<a href="https://github.com/QwenLM/Qwen3-VL">Qwen3.5-VL</a> 与 <a href="https://github.com/EvolvingLMMs-Lab/lmms-eval">lmms-eval</a> 构建。页面模板改编自 <a href="https://nerfies.github.io/">Nerfies</a> 项目主页。</p>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    function setLang(lang) {
+      if (lang !== 'en' && lang !== 'zh') lang = 'en';
+      document.body.setAttribute('data-lang', lang);
+      document.documentElement.setAttribute('lang', lang === 'zh' ? 'zh-CN' : 'en');
+      var be = document.getElementById('lang-btn-en'), bz = document.getElementById('lang-btn-zh');
+      if (be && bz) { be.classList.toggle('active', lang === 'en'); bz.classList.toggle('active', lang === 'zh'); }
+      try { localStorage.setItem('visionrl2-lang', lang); } catch (e) {}
+      if (window.RLSTEP && window.RLSTEP.rerender) window.RLSTEP.rerender();
+    }
+    window.setLang = setLang;
+    var saved = 'en';
+    try { saved = localStorage.getItem('visionrl2-lang') || 'en'; } catch (e) {}
+    setLang(saved);
+  })();
+</script>
+<script src="assets/rl_step/cases.js"></script>
+<script src="assets/rlstep.js"></script>
+</body>
+</html>
