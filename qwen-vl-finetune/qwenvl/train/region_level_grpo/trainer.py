@@ -1186,10 +1186,18 @@ def _build_masked_pils(
     K, Hg, Wg = keep_masks.shape
     arr = np.asarray(src_pil).astype(np.float32) / 255.0  # (H, W, 3)
     H, W, _ = arr.shape
-    # CLIP-normalized image_mean used by Qwen processors.
+    # Fill = the processor's image_mean (what normalizes to zero): CLIP mean
+    # for the Qwen processors; black for Gemma-4 (no normalization, and the
+    # same fill its Phase-A expand2square padding used).
     mean_rgb = np.array(
         [0.48145466, 0.4578275, 0.40821073], dtype=np.float32
     )
+    if _REWARD_MASK_IP is not None:
+        _im = getattr(_REWARD_MASK_IP, "image_mean", None)
+        if not getattr(_REWARD_MASK_IP, "do_normalize", True):
+            mean_rgb = np.zeros(3, dtype=np.float32)
+        elif _im is not None and len(_im) == 3:
+            mean_rgb = np.asarray(_im, dtype=np.float32)
 
     def _one(k: int):
         m = keep_masks[k].astype(bool)

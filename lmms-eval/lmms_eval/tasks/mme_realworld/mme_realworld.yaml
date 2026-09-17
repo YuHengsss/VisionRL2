@@ -5,6 +5,8 @@ dataset_kwargs:
 task: mmerealworld
 test_split: train
 output_type: generate_until
+# env-driven doc sharding (QZOOM_DOC_IDS_FILE / QZOOM_DOC_STRIDE / QZOOM_DOC_RANGE); inert when unset
+process_docs: !function utils.mme_realworld_slice
 doc_to_visual: !function utils.mme_realworld_doc_to_visual
 doc_to_text: !function utils.mme_realworld_doc_to_text
 doc_to_target: "answer"

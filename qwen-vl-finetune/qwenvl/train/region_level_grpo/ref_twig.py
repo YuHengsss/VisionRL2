@@ -296,6 +296,12 @@ def load_ref_twig_from_policy(model: nn.Module) -> RefTwigModule:
     path, with a named-modules fallback for any layout variation — mirrors
     ``_freeze_for_phase_b1``.
     """
+    # Gemma-4 (encoder-free, per-layer-type rope/mask): dedicated module.
+    from qwenvl.train.region_level_grpo.gemma_support import (
+        is_gemma, load_gemma_ref_twig,
+    )
+    if is_gemma(model):
+        return load_gemma_ref_twig(model)
     lm_node = getattr(model, "model", model)
     lm_node = getattr(lm_node, "language_model", lm_node)
     twig_layers = getattr(lm_node, "twig_layers", None)

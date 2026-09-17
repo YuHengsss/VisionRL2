@@ -63,14 +63,16 @@ from PIL import Image
 
 # --- project imports (resolve repo root) -----------------------------------
 _THIS = Path(__file__).resolve()
-# parents[0]=cli/, [1]=region_level_grpo/, [2]=train/, [3]=qwenvl/,
-# [4]=qwen-vl-finetune/, [5]=repo root
-_REPO_ROOT = _THIS.parents[5]
+# data_prep/pre_rl_filter.py -> parents[1] = repo root
+_REPO_ROOT = _THIS.parents[1]
 for p in (_REPO_ROOT, _REPO_ROOT / "qwen-vl-finetune"):
     if str(p) not in sys.path:
         sys.path.insert(0, str(p))
 
-from qzoom_demo.qzoom_wrapper import QZoomInference  # noqa: E402
+try:  # Qwen heatmap runner (research-tree demo wrapper); Gemma has its own.
+    from qzoom_demo.qzoom_wrapper import QZoomInference  # noqa: E402
+except ImportError:  # pragma: no cover
+    QZoomInference = None  # type: ignore[assignment]
 from qwenvl.train.region_level_grpo.actions import (  # noqa: E402
     enumerate_removal_actions,
 )
@@ -129,12 +131,14 @@ def dump_profile() -> str:
 
 # --- per-source image roots, mirroring make_data/debug_step73_data.py ------
 
+import os as _os  # noqa: E402
+_DATASET_ROOT = _os.environ.get("DATASET_ROOT", "/home/yuheng/datasets")
 DS_IMAGE_ROOTS: Dict[str, str] = {
-    "textvqa": "/home/yuheng/datasets/textvqa/train_images",
-    "docvqa": "/home/yuheng/datasets/DocVQA",
-    "infographicsvqa": "/home/yuheng/datasets/infographicsvqa/infographicsvqa_images",
-    "gqa": "/home/yuheng/datasets/gqa/images",
-    "chartqa": "/home/yuheng/datasets/ChartQA/images",
+    "textvqa": f"{_DATASET_ROOT}/textvqa/train_images",
+    "docvqa": f"{_DATASET_ROOT}/DocVQA",
+    "infographicsvqa": f"{_DATASET_ROOT}/infographicsvqa/infographicsvqa_images",
+    "gqa": f"{_DATASET_ROOT}/gqa/images",
+    "chartqa": f"{_DATASET_ROOT}/ChartQA/images",
 }
 
 
@@ -499,7 +503,7 @@ def main() -> None:
     ap.add_argument("--model-path", required=True,
                     help="Phase-A checkpoint path (used for both naming and inference).")
     ap.add_argument("--model-family", default="qwen3_5",
-                    choices=["qwen2_5_vl", "qwen3_vl", "qwen3_5"])
+                    choices=["qwen2_5_vl", "qwen3_vl", "qwen3_5", "gemma4"])
     ap.add_argument("--input-jsonl", type=Path,
                     default=Path("/home/yuheng/datasets/visual_cot_jsonl/vcot50k_source.jsonl"))
 
@@ -548,6 +552,8 @@ def main() -> None:
     # Pixel budget for QZoomInference.
     ap.add_argument("--min-pixels", type=int, default=262144)
     ap.add_argument("--max-pixels", type=int, default=589824)
+    ap.add_argument("--max-soft-tokens", type=int, default=560,
+                    help="Gemma-4 visual token tier (ignored for Qwen).")
 
     # Aggregation only.
     ap.add_argument("--target-retention", type=float, default=0.20)
@@ -624,21 +630,34 @@ def main() -> None:
 
     # Load model.
     print(f"[prefilter] loading model: {args.model_path}", flush=True)
-    runner = QZoomInference(
-        pretrained=args.model_path,
-        model_family=args.model_family,
-        attn_implementation="flash_attention_2",
-        min_pixels=args.min_pixels,
-        max_pixels=args.max_pixels,
-        roi_conf_thresh=0.0,
-        high_res_thresh=0.10,
-        dynamic_conf_mode="peak_ratio",
-        dynamic_ratio_thresh=3.0,
-        dynamic_peak_fraction=0.15,  # only matters for runner.infer's own threshold; we re-threshold after
-    )
+    if "gemma" in str(args.model_family).lower():
+        # Gemma-4: discrete visual tier, last-prompt-token heatmap, sdpa.
+        from qwenvl.train.region_level_grpo.gemma_support import GemmaHeatmapRunner
+        runner = GemmaHeatmapRunner(
+            pretrained=args.model_path,
+            max_soft_tokens=args.max_soft_tokens,
+            attn_implementation="sdpa",
+        )
+    else:
+        if QZoomInference is None:
+            raise ImportError("qzoom_demo.qzoom_wrapper.QZoomInference not importable "
+                              "(needed for the Qwen families)")
+        runner = QZoomInference(
+            pretrained=args.model_path,
+            model_family=args.model_family,
+            attn_implementation="flash_attention_2",
+            min_pixels=args.min_pixels,
+            max_pixels=args.max_pixels,
+            roi_conf_thresh=0.0,
+            high_res_thresh=0.10,
+            dynamic_conf_mode="peak_ratio",
+            dynamic_ratio_thresh=3.0,
+            dynamic_peak_fraction=0.15,  # only matters for runner.infer's own threshold; we re-threshold after
+        )
     reward_model = RewardModel(
         model=runner.model,
         processor=runner.processor,
+        model_family=args.model_family,
     )
 
     # Stage 1 loop.

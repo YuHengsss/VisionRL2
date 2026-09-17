@@ -111,6 +111,10 @@ class RewardModel:
         # empty for q25 / q3-VL regardless of the flag. See _think_prefix().
         self.model_family = model_family
         self._is_qwen35 = _detect_qwen35(model, model_family)
+        # Gemma-4: chat strings from the processor template (thinking off),
+        # one image per sample passed as a nested list, gold closed by <turn|>.
+        from qwenvl.train.region_level_grpo.gemma_support import is_gemma
+        self._is_gemma = is_gemma(model_family) or is_gemma(model)
         # Exclude the closing `<|im_end|>` from the answer-mask so the log_p
         # reduction only spans the gold-answer content tokens. `<|im_end|>`
         # after a short answer carries noise about whether the model wanted
@@ -264,13 +268,21 @@ class RewardModel:
                 _PILImage.BICUBIC,
             )
         images_flat = [_ensure_min_side(_im) for _im in images_flat]
-        inputs = self.processor(
-            text=[text_full] * K,
-            images=images_flat,
-            return_tensors="pt",
-            padding=True,
-        )
-        inputs = {k: v.to(device) for k, v in inputs.items()}
+        if getattr(self, "_is_gemma", False):
+            from qwenvl.train.region_level_grpo.gemma_support import (
+                gemma_processor_call,
+            )
+            inputs = gemma_processor_call(
+                self.processor, [text_full] * K, images_flat)
+        else:
+            inputs = self.processor(
+                text=[text_full] * K,
+                images=images_flat,
+                return_tensors="pt",
+                padding=True,
+            )
+        inputs = {k: (v.to(device) if hasattr(v, "to") else v)
+                  for k, v in inputs.items()}
 
         # 4. Forward through the (frozen) model.
         # Memory:
@@ -337,6 +349,11 @@ class RewardModel:
         ``<|image_pad|>`` placeholder is at a known position for
         processor expansion.
         """
+        if getattr(self, "_is_gemma", False):
+            from qwenvl.train.region_level_grpo.gemma_support import (
+                gemma_chat_strings,
+            )
+            return gemma_chat_strings(self.processor, question, gold_answer)
         sys = self.system_message
         user_with_image = self.image_token_template + question
         # Official Qwen3.5-VL ``enable_thinking=False`` template --

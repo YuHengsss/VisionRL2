@@ -242,7 +242,16 @@ class RegionLevelGRPOCollator:
     system_message: str = _DEFAULT_SYSTEM_MESSAGE
     image_token_template: str = _VISION_TEMPLATE
 
+    def _is_gemma(self) -> bool:
+        from qwenvl.train.region_level_grpo.gemma_support import is_gemma
+        return is_gemma(self.processor)
+
     def _format_chat_strings(self, question: str, gold_answer: str):
+        if self._is_gemma():
+            from qwenvl.train.region_level_grpo.gemma_support import (
+                gemma_chat_strings,
+            )
+            return gemma_chat_strings(self.processor, question, gold_answer)
         user = f"{self.image_token_template}{question}"
         text_full = (
             f"<|im_start|>system\n{self.system_message}<|im_end|>\n"
@@ -280,12 +289,19 @@ class RegionLevelGRPOCollator:
             text_prompts.append(tp)
             n_answer_tokens.append(max(0, n_full - n_prompt))
 
-        proc_inputs = self.processor(
-            text=text_fulls,
-            images=pil_images,
-            return_tensors="pt",
-            padding=True,
-        )
+        if self._is_gemma():
+            from qwenvl.train.region_level_grpo.gemma_support import (
+                gemma_processor_call,
+            )
+            proc_inputs = gemma_processor_call(
+                self.processor, text_fulls, pil_images)
+        else:
+            proc_inputs = self.processor(
+                text=text_fulls,
+                images=pil_images,
+                return_tensors="pt",
+                padding=True,
+            )
 
         # Build labels: -100 everywhere except the last n_answer valid
         # positions per sample (right-padded sequences need attention_mask
