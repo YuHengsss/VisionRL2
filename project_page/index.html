@@ -50,9 +50,15 @@
             <span class="lang-zh"><strong>Vision-RL²</strong>：用冻结的多模态大模型作为“阅读器”，以区域级强化学习训练 RoI 预测器</span>
           </p>
 
-          <!-- TODO(release): fill in authors / affiliations before the page goes public -->
           <div class="publication-authors">
-            <span class="author-block"><span class="lang-en">Authors to be announced</span><span class="lang-zh">作者信息待公开</span></span>
+            <span class="author-block"><a href="mailto:yshi0087@uni.sydney.edu.au">Yuheng Shi</a><sup>1</sup>,</span>
+            <span class="author-block"><a href="mailto:xiaohuan.pei@sydney.edu.au">Xiaohuan Pei</a><sup>1</sup>,</span>
+            <span class="author-block"><a href="mailto:minjdong@cityu.edu.hk">Minjing Dong</a><sup>2</sup>,</span>
+            <span class="author-block"><a href="mailto:c.xu@sydney.edu.au">Chang Xu</a><sup>1</sup></span>
+          </div>
+          <div class="publication-affiliations">
+            <span class="lang-en"><sup>1</sup>University of Sydney &nbsp;&nbsp;&nbsp; <sup>2</sup>City University of Hong Kong</span>
+            <span class="lang-zh"><sup>1</sup>悉尼大学 &nbsp;&nbsp;&nbsp; <sup>2</sup>香港城市大学</span>
           </div>
           <div class="publication-affiliations">
             <span class="lang-en">Under review as a conference paper at ICLR 2027</span>
@@ -292,6 +298,10 @@
           <tr><td>Vision-OPD</td><td>9B</td><td>90.6</td><td>65.1</td><td>87.1</td><td>85.6</td><td>73.2</td><td>70.3</td><td>78.7</td></tr>
           <tr class="ours-row"><td>Vision-RL² (ours)</td><td>4B</td><td>91.1</td><td>65.1</td><td>84.3</td><td>80.3</td><td>65.8</td><td>65.3</td><td>75.3</td></tr>
           <tr class="ours-row"><td>Vision-RL² (ours)</td><td>9B</td><td><strong>95.3</strong></td><td><strong>68.4</strong></td><td>86.8</td><td>86.1</td><td>73.4</td><td>70.6</td><td><strong>80.1</strong></td></tr>
+          <tr class="group-row"><td colspan="9"><span class="lang-en">Gemma-4 based (encoder-free)</span><span class="lang-zh">基于 Gemma-4（无视觉编码器）</span></td></tr>
+          <tr><td>Gemma-4-it</td><td>12B</td><td>72.8</td><td>46.5</td><td>75.5</td><td>67.5</td><td>65.2</td><td>52.4</td><td>63.3</td></tr>
+          <tr><td>SD-RPN</td><td>12B</td><td>78.0</td><td>57.0</td><td>82.4</td><td>77.5</td><td>65.7</td><td>53.1</td><td>69.0</td></tr>
+          <tr class="ours-row"><td>Vision-RL² (ours)</td><td>12B</td><td>82.2</td><td>60.7</td><td>85.0</td><td>79.4</td><td>67.6</td><td>61.6</td><td>72.8</td></tr>
         </tbody>
       </table>
     </div>
@@ -323,31 +333,6 @@
     </div>
 
     <div class="content" style="margin-top:1.4rem;">
-      <h3><span class="lang-en">Ablations (Qwen3.5-4B, training-aligned protocol, 576-token limit)</span><span class="lang-zh">消融实验（Qwen3.5-4B，训练对齐协议，576 token 上限）</span></h3>
-    </div>
-    <div class="table-container">
-      <table class="table is-narrow is-hoverable results-table">
-        <thead><tr><th><span class="lang-en">Variant</span><span class="lang-zh">变体</span></th><th>V*</th><th>ZoomBench</th><th>HR-4K</th><th>HR-8K</th><th>MME-RW Lite</th><th>InfoVQA</th><th>Avg.</th><th>Δ</th></tr></thead>
-        <tbody>
-          <tr class="muted-row"><td>Qwen3.5-4B (base)</td><td>66.0</td><td>40.5</td><td>63.5</td><td>56.4</td><td>41.0</td><td>69.8</td><td>56.2</td><td>—</td></tr>
-          <tr class="group-row"><td colspan="9"><span class="lang-en">Mechanism</span><span class="lang-zh">机制</span></td></tr>
-          <tr><td>SD-RPN</td><td>82.7</td><td>55.6</td><td>71.1</td><td>63.3</td><td>48.9</td><td>78.1</td><td>66.6</td><td>−3.0</td></tr>
-          <tr class="ours-row"><td>SD-RPN + region-level RL (full recipe)</td><td>82.2</td><td>58.7</td><td>77.3</td><td>69.1</td><td>50.4</td><td>80.1</td><td>69.6</td><td>—</td></tr>
-          <tr><td>+ sparse visual encoding</td><td><strong>85.3</strong></td><td><strong>61.8</strong></td><td><strong>77.4</strong></td><td><strong>70.9</strong></td><td><strong>51.0</strong></td><td><strong>80.5</strong></td><td><strong>71.1</strong></td><td>+1.5</td></tr>
-          <tr class="group-row"><td colspan="9"><span class="lang-en">Reward: functional score →</span><span class="lang-zh">奖励：功能得分 →</span></td></tr>
-          <tr><td>generation accuracy</td><td>80.6</td><td>53.3</td><td>73.9</td><td>65.1</td><td>50.7</td><td>80.5</td><td>67.3</td><td>−2.3</td></tr>
-          <tr><td>raw log-probability</td><td>81.7</td><td>53.1</td><td>75.8</td><td>67.6</td><td>50.0</td><td>80.4</td><td>68.1</td><td>−1.5</td></tr>
-          <tr class="group-row"><td colspan="9"><span class="lang-en">Actions: singleton removals →</span><span class="lang-zh">动作：单区域移除 →</span></td></tr>
-          <tr><td>singleton + pair removals</td><td>83.3</td><td>56.7</td><td>76.8</td><td>69.8</td><td>51.4</td><td>80.5</td><td>69.7</td><td>+0.1</td></tr>
-          <tr><td>cell-level keep-sets</td><td>84.3</td><td>57.0</td><td>72.9</td><td>65.6</td><td>50.6</td><td>80.2</td><td>68.4</td><td>−1.2</td></tr>
-          <tr class="group-row"><td colspan="9"><span class="lang-en">Credit assignment</span><span class="lang-zh">信用分配</span></td></tr>
-          <tr><td>no control-region margin (κ = 0)</td><td>82.2</td><td>54.2</td><td>76.0</td><td>69.1</td><td>49.7</td><td>79.8</td><td>68.5</td><td>−1.1</td></tr>
-          <tr><td>no additive group</td><td>82.2</td><td>55.6</td><td>75.5</td><td>68.4</td><td>50.1</td><td>80.3</td><td>68.7</td><td>−0.9</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="content" style="margin-top:1.4rem;">
       <h3><span class="lang-en">Qualitative comparison</span><span class="lang-zh">定性对比</span></h3>
     </div>
     <div class="figure-block">
@@ -364,16 +349,17 @@
       <span class="lang-en">Checkpoints and code</span><span class="lang-zh">模型权重与代码</span>
     </h2>
     <div class="content">
-      <p class="lang-en">Training and evaluation code is released in the <a href="https://github.com/YuHengsss/VisionRL2">VisionRL2</a> repository: SD-RPN online pseudo-label training, the region-level RL recipe for the three backbones, and the two evaluation protocols. Model weights and the RL pool will be released on Hugging Face.</p>
-      <p class="lang-zh">训练与评估代码发布在 <a href="https://github.com/YuHengsss/VisionRL2">VisionRL2</a> 仓库：SD-RPN 在线伪标签训练、三个主干的区域级 RL 配方，以及两套评估协议。模型权重与 RL 训练池将在 Hugging Face 发布。</p>
+      <p class="lang-en">Training and evaluation code is released in the <a href="https://github.com/YuHengsss/VisionRL2">VisionRL2</a> repository: SD-RPN online pseudo-label training, the region-level RL recipe for all four backbones (Qwen3.5-4B / 9B, Qwen2.5-VL-7B and the encoder-free Gemma-4-12B), and the two evaluation protocols. Model weights and the RL pool will be released on Hugging Face.</p>
+      <p class="lang-zh">训练与评估代码发布在 <a href="https://github.com/YuHengsss/VisionRL2">VisionRL2</a> 仓库：SD-RPN 在线伪标签训练、四个主干（Qwen3.5-4B / 9B、Qwen2.5-VL-7B 以及无视觉编码器的 Gemma-4-12B）的区域级 RL 配方，以及两套评估协议。模型权重与 RL 训练池将在 Hugging Face 发布。</p>
     </div>
     <div class="table-container">
       <table class="table is-narrow results-table">
-        <thead><tr><th><span class="lang-en">Backbone</span><span class="lang-zh">主干</span></th><th>Twig</th><th><span class="lang-en">Trainable params</span><span class="lang-zh">可训练参数</span></th><th><span class="lang-en">Main-table avg.</span><span class="lang-zh">主表平均</span></th><th><span class="lang-en">Weights</span><span class="lang-zh">权重</span></th></tr></thead>
+        <thead><tr><th><span class="lang-en">Backbone</span><span class="lang-zh">主干</span></th><th>Twig</th><th><span class="lang-en">Trainable params</span><span class="lang-zh">可训练参数</span></th><th><span class="lang-en">Main-table avg.</span><span class="lang-zh">主表平均</span></th><th>SD-RPN</th><th>Vision-RL²</th></tr></thead>
         <tbody>
-          <tr><td>Qwen3.5-VL-4B</td><td>K = 21, T = 3</td><td><span class="lang-en">predictor only</span><span class="lang-zh">仅预测器</span></td><td>75.3</td><td><span class="lang-en">coming soon</span><span class="lang-zh">即将发布</span></td></tr>
-          <tr><td>Qwen3.5-VL-9B</td><td>K = 21, T = 3</td><td><span class="lang-en">predictor only</span><span class="lang-zh">仅预测器</span></td><td>80.1</td><td><span class="lang-en">coming soon</span><span class="lang-zh">即将发布</span></td></tr>
-          <tr><td>Qwen2.5-VL-7B</td><td>K = 18, T = 3</td><td><span class="lang-en">predictor only</span><span class="lang-zh">仅预测器</span></td><td>71.0</td><td><span class="lang-en">coming soon</span><span class="lang-zh">即将发布</span></td></tr>
+          <tr><td>Qwen3.5-VL-4B</td><td>K = 21, T = 3</td><td><span class="lang-en">predictor only</span><span class="lang-zh">仅预测器</span></td><td>75.3</td><td><span class="lang-en">coming soon</span><span class="lang-zh">即将发布</span></td><td><span class="lang-en">coming soon</span><span class="lang-zh">即将发布</span></td></tr>
+          <tr><td>Qwen3.5-VL-9B</td><td>K = 21, T = 3</td><td><span class="lang-en">predictor only</span><span class="lang-zh">仅预测器</span></td><td>80.1</td><td><span class="lang-en">coming soon</span><span class="lang-zh">即将发布</span></td><td><span class="lang-en">coming soon</span><span class="lang-zh">即将发布</span></td></tr>
+          <tr><td>Qwen2.5-VL-7B</td><td>K = 18, T = 3</td><td><span class="lang-en">predictor only</span><span class="lang-zh">仅预测器</span></td><td>71.0</td><td><span class="lang-en">coming soon</span><span class="lang-zh">即将发布</span></td><td><span class="lang-en">coming soon</span><span class="lang-zh">即将发布</span></td></tr>
+          <tr><td>Gemma-4-12B-it <span class="lang-en">(encoder-free)</span><span class="lang-zh">（无视觉编码器）</span></td><td>K = 27, T = 3</td><td><span class="lang-en">predictor only</span><span class="lang-zh">仅预测器</span></td><td>72.8</td><td><span class="lang-en">coming soon</span><span class="lang-zh">即将发布</span></td><td><span class="lang-en">coming soon</span><span class="lang-zh">即将发布</span></td></tr>
         </tbody>
       </table>
     </div>
@@ -388,7 +374,7 @@
     </h2>
     <div class="bibtex-block"><pre><code>@article{visionrl2_2026,
   title   = {Region-Level Policy Optimization for Fine-grained MLLM Perception},
-  author  = {To be announced},
+  author  = {Shi, Yuheng and Pei, Xiaohuan and Dong, Minjing and Xu, Chang},
   journal = {arXiv preprint},
   year    = {2026}
 }</code></pre></div>
@@ -397,8 +383,8 @@
 
 <footer class="footer">
   <div class="content">
-    <p class="lang-en">This page is part of the <a href="https://github.com/YuHengsss/VisionRL2">VisionRL2 release</a>. Built on <a href="https://github.com/QwenLM/Qwen2.5-VL">Qwen2.5-VL</a>, <a href="https://github.com/QwenLM/Qwen3-VL">Qwen3.5-VL</a>, and <a href="https://github.com/EvolvingLMMs-Lab/lmms-eval">lmms-eval</a>. Template adapted from the <a href="https://nerfies.github.io/">Nerfies</a> project page.</p>
-    <p class="lang-zh">本页面属于 <a href="https://github.com/YuHengsss/VisionRL2">VisionRL2 发布内容</a>，基于 <a href="https://github.com/QwenLM/Qwen2.5-VL">Qwen2.5-VL</a>、<a href="https://github.com/QwenLM/Qwen3-VL">Qwen3.5-VL</a> 与 <a href="https://github.com/EvolvingLMMs-Lab/lmms-eval">lmms-eval</a> 构建。页面模板改编自 <a href="https://nerfies.github.io/">Nerfies</a> 项目主页。</p>
+    <p class="lang-en">This page is part of the <a href="https://github.com/YuHengsss/VisionRL2">VisionRL2 release</a>. Built on <a href="https://github.com/QwenLM/Qwen2.5-VL">Qwen2.5-VL</a>, <a href="https://github.com/QwenLM/Qwen3-VL">Qwen3.5-VL</a>, <a href="https://github.com/google-deepmind/gemma">Gemma</a>, and <a href="https://github.com/EvolvingLMMs-Lab/lmms-eval">lmms-eval</a>. Template adapted from the <a href="https://nerfies.github.io/">Nerfies</a> project page.</p>
+    <p class="lang-zh">本页面属于 <a href="https://github.com/YuHengsss/VisionRL2">VisionRL2 发布内容</a>，基于 <a href="https://github.com/QwenLM/Qwen2.5-VL">Qwen2.5-VL</a>、<a href="https://github.com/QwenLM/Qwen3-VL">Qwen3.5-VL</a>、<a href="https://github.com/google-deepmind/gemma">Gemma</a> 与 <a href="https://github.com/EvolvingLMMs-Lab/lmms-eval">lmms-eval</a> 构建。页面模板改编自 <a href="https://nerfies.github.io/">Nerfies</a> 项目主页。</p>
   </div>
 </footer>
 
