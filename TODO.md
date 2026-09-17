@@ -6,10 +6,7 @@ block training/eval with locally prepared data + checkpoints.
 ## 1. Data release (HF) - DONE 2026-09-17
 
 Published as [`YuhengSSS/VisionRL2-data`](https://huggingface.co/datasets/YuhengSSS/VisionRL2-data)
-(public dataset repo, ~304 MB, 13 files). The `YuHengsss` namespace was not writable by the
-logged-in token, so the data sits under `iwantmorepaper` for now; re-uploading it under
-`YuhengSSS/VisionRL2-data` later only needs the links in `README.md`, `docs/`, the script
-defaults and the dataset card updated.
+(public dataset repo, ~304 MB, 13 files), next to the image tars in `YuhengSSS/RoITraining`.
 
 - [x] RL pools + evidence-map caches for all four backbones
       (`rl_pools/rl_pool_{qwen3_5_4b,qwen3_5_9b,qwen2_5_vl_7b,gemma4_12b}.jsonl`,
