@@ -45,16 +45,18 @@ Open follow-ups:
 ## 2. Checkpoint release (HF)
 - [ ] SD-RPN (stage-1) checkpoints: `qwen3_5-4b-sdrpn-K21T3`, `qwen3_5-9b-sdrpn-K21T3`,
       `qwen2_5vl-7b-sdrpn-K18T3`.
-- [ ] RL (stage-2) checkpoints for Qwen3.5-4B (kappa 1.25), Qwen3.5-9B (kappa 1.0) and
-      Qwen2.5-VL-7B (kappa 1.0).
-- [ ] Gemma-4-12B checkpoints: SD-RPN `gemma4-12b-sdrpn-K27T3(-delta)` and the RL run
-      (kappa 1.0). Stage 1 already writes a twig-only delta
-      (`twig_delta_final.pt`, ~1.4 GB) reassembled by
-      `qwen_src/gemma4_unified/assemble_full_checkpoint.py` - publish the delta, not the
-      24 GB full directory.
+- [x] RL (stage-2) checkpoints for Qwen3.5-4B (kappa 1.25), Qwen3.5-9B (kappa 1.0) and
+      Qwen2.5-VL-7B (kappa 1.0) - published 2026-09-17 as private HF model repos
+      `YuhengSSS/VisionRL2-Qwen3.5-4B`, `YuhengSSS/VisionRL2-Qwen3.5-9B`,
+      `YuhengSSS/VisionRL2-Qwen2.5-VL-7B` (full directories, frozen backbone + trained twig).
+- [ ] Gemma-4-12B: SD-RPN `gemma4-12b-sdrpn-K27T3(-delta)` still to publish. The RL run
+      (kappa 1.0) is published as the private repo `YuhengSSS/VisionRL2-Gemma-4-12B`
+      (full 24 GB directory, sanitised `config.json`). For stage 1, publish the twig-only
+      delta (`twig_delta_final.pt`, ~1.4 GB) reassembled by
+      `qwen_src/gemma4_unified/assemble_full_checkpoint.py` rather than a full directory.
 - [ ] Decide whether to publish twig-only deltas (`tools/compress_twig.py` format, ~0.6-1.4 GB)
       plus a loader, or full checkpoints.
-- [ ] Fill the checkpoint table in README with the HF ids.
+- [x] Fill the checkpoint table in README with the HF ids (stage-2 column done; stage-1 TBA).
 
 ## 3. Demo
 - [ ] Gradio RoI visualizer (`launch_compare.sh` in the research tree) — port to the

@@ -21,7 +21,8 @@
 
 ## TODO
 
-- [ ] Release the SD-RPN and Vision-RL² checkpoints on Hugging Face (see the table below).
+- [x] Release the Vision-RL² (stage-2) checkpoints on Hugging Face (see the table below);
+      the SD-RPN (stage-1) checkpoints follow.
 - [x] Release the RL pools and evidence-map caches, plus the SD-RPN training corpora
       ([`YuhengSSS/VisionRL2-data`](https://huggingface.co/datasets/YuhengSSS/VisionRL2-data)).
 - [ ] Gradio RoI visualizer ported to the release code paths.
@@ -214,10 +215,14 @@ and [docs/GEMMA4.md](docs/GEMMA4.md).
 
 | Backbone | Twig | SD-RPN (stage 1) | Vision-RL² (stage 2) |
 |---|---|---|---|
-| [Qwen3.5-4B](https://huggingface.co/Qwen/Qwen3.5-4B) | K = 21, T = 3 | TBA | TBA |
-| [Qwen3.5-9B](https://huggingface.co/Qwen/Qwen3.5-9B) | K = 21, T = 3 | TBA | TBA |
-| [Qwen2.5-VL-7B](https://huggingface.co/Qwen/Qwen2.5-VL-7B-Instruct) | K = 18, T = 3 | TBA | TBA |
-| [Gemma-4-12B-it](https://huggingface.co/google/gemma-4-12B-it) | K = 27, T = 3 | TBA | TBA |
+| [Qwen3.5-4B](https://huggingface.co/Qwen/Qwen3.5-4B) | K = 21, T = 3 | TBA | [VisionRL2-Qwen3.5-4B](https://huggingface.co/YuhengSSS/VisionRL2-Qwen3.5-4B) |
+| [Qwen3.5-9B](https://huggingface.co/Qwen/Qwen3.5-9B) | K = 21, T = 3 | TBA | [VisionRL2-Qwen3.5-9B](https://huggingface.co/YuhengSSS/VisionRL2-Qwen3.5-9B) |
+| [Qwen2.5-VL-7B](https://huggingface.co/Qwen/Qwen2.5-VL-7B-Instruct) | K = 18, T = 3 | TBA | [VisionRL2-Qwen2.5-VL-7B](https://huggingface.co/YuhengSSS/VisionRL2-Qwen2.5-VL-7B) |
+| [Gemma-4-12B-it](https://huggingface.co/google/gemma-4-12B-it) | K = 27, T = 3 | TBA | [VisionRL2-Gemma-4-12B](https://huggingface.co/YuhengSSS/VisionRL2-Gemma-4-12B) |
+
+The stage-2 (Vision-RL²) repositories are private for now and hold full model directories
+(frozen backbone + trained twig): download one and pass its path as `CHECKPOINT` to
+`scripts/main_eval*.sh` / `scripts/aligned_eval*.sh`. The SD-RPN (stage-1) checkpoints follow.
 
 Stage-1 checkpoints load from `output/sdrpn/{qwen3_5-4b-sdrpn-K21T3, qwen3_5-9b-sdrpn-K21T3,
 qwen2_5vl-7b-sdrpn-K18T3, gemma4-12b-sdrpn-K27T3}`; stage-2 runs land under `output/rl/`.
