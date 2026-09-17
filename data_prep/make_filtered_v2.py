@@ -110,7 +110,7 @@ def main():
             else:
                 chosen = bucket_sorted[:target]
                 msg = (f"top {target} of {n_avail} by reward_std "
-                       f"(cutoff={float(chosen[-1]['reward_std']):.4f})")
+                       f"(cutoff={float(chosen[-1].get('reward_std', 0.0)):.4f})")
         elif mode == "top_frac_then_sample":
             top_frac = float(spec["top_frac"])
             pool_size = max(target, int(round(top_frac * n_avail)))
@@ -121,10 +121,10 @@ def main():
             msg = (f"random {target} sampled (seed={seed}) "
                    f"from top {len(pool)} ({top_frac*100:.0f}% of "
                    f"{n_avail}) by reward_std "
-                   f"[pool cutoff={float(pool[-1]['reward_std']):.4f}, "
+                   f"[pool cutoff={float(pool[-1].get('reward_std', 0.0)):.4f}, "
                    f"chosen std range="
-                   f"{min(float(r['reward_std']) for r in chosen):.4f}–"
-                   f"{max(float(r['reward_std']) for r in chosen):.4f}]")
+                   f"{min(float(r.get('reward_std', 0.0)) for r in chosen):.4f}–"
+                   f"{max(float(r.get('reward_std', 0.0)) for r in chosen):.4f}]")
         else:
             raise ValueError(f"unknown mode {mode}")
         print(f"[v2] {ds}: {msg}")

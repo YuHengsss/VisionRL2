@@ -245,6 +245,31 @@ def run_step(model, ref_twig, reward_model, collator, item, device, cfg, want_im
             acts.append(d)
             if want_images:
                 imgs[f"act_{i}.jpg"] = pils[i]
+        if cfg.get("pairs") and 2 <= K <= 5:
+            pairs, pmasks = [], []
+            for i1 in range(K):
+                for i2 in range(i1 + 1, K):
+                    km = np.zeros((Hg, Wg), dtype=bool)
+                    for kk in range(K):
+                        if kk not in (i1, i2):
+                            km |= top[kk].mask.astype(bool)
+                    if km.sum() == 0:
+                        continue
+                    pairs.append((i1, i2)); pmasks.append(km.astype(np.uint8))
+            if pairs:
+                ppils2 = _build_masked_pils(src, np.stack(pmasks, 0))
+                with torch.no_grad():
+                    plp2 = reward_model.compute_logprobs(masked_images=ppils2, question=q,
+                                                         gold_answer=gold, device=device,
+                                                         reduction="mean").float()
+                pp2 = torch.exp(plp2).clamp(max=1 - 1e-6)
+                plg2 = plp2 - torch.log1p(-pp2)
+                g0 = lg[empty_idx]
+                ph2 = g0 + torch.clamp(plg2 - g0, min=-cfg["clip_delta"], max=cfg["clip_delta"])
+                single = {a["discard"][0]: a["delta"] for a in acts if a["discard"]}
+                res["pairs"] = [{"pair": list(pr), "delta_pair": float(heights[empty_idx] - ph2[t]),
+                                 "delta_i": single.get(pr[0]), "delta_j": single.get(pr[1])}
+                                for t, pr in enumerate(pairs)]
         res["sub"] = {"actions": acts, "empty_idx": empty_idx, "bar": bar,
                       "kappa": cfg["kappa"], "probes": probes,
                       "h_empty": float(heights[empty_idx]), "p_empty": float(torch.exp(lp[empty_idx]))}
@@ -355,6 +380,7 @@ def main():
     ap.add_argument("--indices", default="")
     ap.add_argument("--kappa", type=float, default=1.25)
     ap.add_argument("--device", default="cuda:0")
+    ap.add_argument("--pairs", action="store_true", help="also score pair removals (scan stats)")
     args = ap.parse_args()
 
     os.environ["DATASET_ROOT"] = args.dataset_root
@@ -366,7 +392,8 @@ def main():
 
     cfg = dict(smooth_kernel=3, smooth_sigma=1.0, fixed_threshold=0.02, ratio_thresh=3.0,
                peak_fraction=0.3, min_gate=0.03, R_max=6, clip_delta=5.0,
-               placebo_p_thresh=0.02, kappa=args.kappa, bar_max=1.0, supp_k_max=4)
+               placebo_p_thresh=0.02, kappa=args.kappa, bar_max=1.0, supp_k_max=4,
+               pairs=bool(args.pairs))
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
 
@@ -393,6 +420,11 @@ def main():
                         "p_empty": sub.get("p_empty"),
                         "deltas": [a.get("delta") for a in acts if a.get("discard")],
                         "decisions": [a.get("decision") for a in acts if a.get("discard")],
+                        "advs": [a.get("adv") for a in acts if a.get("discard")],
+                        "pis": [a.get("pi") for a in acts if a.get("discard")],
+                        "pi_empty": (acts[sub["empty_idx"]]["pi"] if acts else None),
+                        "regions_area": [r["area"] for r in res.get("regions", [])],
+                        "pairs": res.get("pairs"),
                         "supp": [(s["delta"], s["decision"]) for s in res.get("add", {}).get("supp", [])],
                         "question": item["question"][:120], "gold": item["gold_answer"][:60]}
                 fo.write(json.dumps(summ) + "\n"); fo.flush()

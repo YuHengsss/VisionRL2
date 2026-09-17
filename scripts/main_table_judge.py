@@ -122,17 +122,33 @@ class LLMJudge:
         self.processor = AutoProcessor.from_pretrained(model_id)
         self.max_new_tokens = max_new_tokens
 
-    def __call__(self, prompt):
+    def _render(self, prompt):
         msgs = [{"role": "user", "content": [{"type": "text", "text": prompt}]}]
         try:
-            text = self.processor.apply_chat_template(
+            return self.processor.apply_chat_template(
                 msgs, tokenize=False, add_generation_prompt=True, enable_thinking=False)
         except TypeError:
-            text = self.processor.apply_chat_template(msgs, tokenize=False, add_generation_prompt=True)
-        inputs = self.processor(text=[text], images=None, padding=True, return_tensors="pt").to(self.model.device)
+            return self.processor.apply_chat_template(msgs, tokenize=False, add_generation_prompt=True)
+
+    def __call__(self, prompt):
+        return self.batch([prompt])[0]
+
+    def batch(self, prompts):
+        """Greedy verdicts for a list of prompts in one left-padded generate call
+        (verdict-identical to the per-item call; only the padding differs)."""
+        texts = [self._render(p) for p in prompts]
+        tok = self.processor.tokenizer
+        prev_side = tok.padding_side
+        tok.padding_side = "left"
+        try:
+            inputs = self.processor(text=texts, images=None, padding=True, return_tensors="pt").to(self.model.device)
+        finally:
+            tok.padding_side = prev_side
         with self.torch.inference_mode():
-            gen = self.model.generate(**inputs, do_sample=False, max_new_tokens=self.max_new_tokens)
-        return self.processor.batch_decode(gen[:, inputs.input_ids.shape[1]:], skip_special_tokens=True)[0].strip()
+            gen = self.model.generate(**inputs, do_sample=False, max_new_tokens=self.max_new_tokens,
+                                      pad_token_id=tok.pad_token_id)
+        outs = self.processor.batch_decode(gen[:, inputs.input_ids.shape[1]:], skip_special_tokens=True)
+        return [o.strip() for o in outs]
 
 
 # ----------------------------------------------------------------------------
@@ -180,6 +196,8 @@ def main():
     ap.add_argument("out_dir", help="eval output dir containing *samples_<task>*.jsonl")
     ap.add_argument("--judge-model", default="Qwen/Qwen3.5-9B")
     ap.add_argument("--judge-max-tokens", type=int, default=1024)
+    ap.add_argument("--judge-batch-size", type=int, default=int(os.environ.get("JUDGE_BATCH", "32")),
+                    help="prompts per generate call (left-padded, greedy); JUDGE_BATCH=1 reproduces the per-item call")
     ap.add_argument("--no-llm", action="store_true", help="rule pass only (debug)")
     a = ap.parse_args()
 
@@ -231,12 +249,16 @@ def main():
             if judge is None:
                 judge = LLMJudge(a.judge_model, a.judge_max_tokens)
             print(f"[{bench}] LLM judge on {len(pending)} / {len(rows)} items", flush=True)
-            for i, r in enumerate(pending, 1):
-                r["judge"] = judge(PROMPT_TEMPLATE.format(gt=r["target"], response=r["extracted_answer"],
-                                                         question=judge_question(bench, r["input"])))
-                r["judge_source"] = "llm"
-                if i % 100 == 0:
-                    print(f"  {i}/{len(pending)}", flush=True)
+            bs = max(1, int(a.judge_batch_size))
+            for s0 in range(0, len(pending), bs):
+                chunk = pending[s0:s0 + bs]
+                verdicts = judge.batch([PROMPT_TEMPLATE.format(gt=r["target"], response=r["extracted_answer"],
+                                                               question=judge_question(bench, r["input"])) for r in chunk])
+                for r, v in zip(chunk, verdicts):
+                    r["judge"], r["judge_source"] = v, "llm"
+                done = min(s0 + bs, len(pending))
+                if done % 100 < bs or done == len(pending):
+                    print(f"  {done}/{len(pending)}", flush=True)
         elif pending:
             for r in pending:
                 r["judge"], r["judge_source"] = "No", "skipped"

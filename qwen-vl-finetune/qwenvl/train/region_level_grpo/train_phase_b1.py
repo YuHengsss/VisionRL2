@@ -88,6 +88,9 @@ class PhaseB1Arguments:
     # ---- pixel budget (applied to the processor's image_processor) ----
     min_pixels: int = field(default=262144)
     max_pixels: int = field(default=589824)
+    # Gemma-4 (encoder-free, discrete tiers): visual token tier instead of a
+    # pixel budget. Ignored for the Qwen families.
+    max_soft_tokens: int = field(default=560)
 
     # ---- heatmap → components ----
     threshold_mode: str = field(
@@ -325,6 +328,31 @@ def _load_policy_with_twig(model_args: ModelArguments,
         model_args.model_name_or_path, trust_remote_code=True,
     )
     _cfg_name = type(original_config).__name__
+    if "Gemma" in _cfg_name:
+        # Gemma-4-12B-it (tf5.15, encoder-free): the SD-RPN flags live on the
+        # text config; the assembled Phase-A checkpoint already carries
+        # enable_twig / twig_K / twig_T. Same policy-side conventions as the
+        # inference heatmap (last prompt token, RoPE, scaling 1.0).
+        from qwen_src.gemma4_unified.modeling_gemma4_unified_batch import (
+            Gemma4UnifiedForConditionalGeneration as _GemmaModel,
+        )
+        config = type(original_config).from_dict(original_config.to_dict())
+        tc = config.get_text_config()
+        tc.enable_twig = True
+        tc.twig_K = model_args.twig_K
+        tc.twig_T = model_args.twig_T
+        tc.online_pseudo_label = False
+        tc.enable_high_res = False
+        tc.return_per_head_score = True
+        config.return_per_head_score = True
+        model = _GemmaModel.from_pretrained(
+            model_args.model_name_or_path,
+            cache_dir=training_args.cache_dir,
+            attn_implementation=attn_implementation,
+            config=config,
+            dtype=torch.bfloat16 if training_args.bf16 else None,
+        )
+        return model
     if "Qwen2_5" in _cfg_name:
         # Qwen2.5-VL-7B (tf4.51): non-gated twig + mrope. The batch fork
         # exposes per_head_scores for RL.
@@ -482,20 +510,31 @@ def train(attn_implementation: str = "flash_attention_2") -> None:
                 output.requires_grad_(True)
             model.get_input_embeddings().register_forward_hook(_hook)
 
-    tokenizer = transformers.AutoTokenizer.from_pretrained(
-        model_args.model_name_or_path,
-        cache_dir=training_args.cache_dir,
-        model_max_length=training_args.model_max_length,
-        padding_side="right",
-        use_fast=False,
-    )
+    from qwenvl.train.region_level_grpo.gemma_support import is_gemma, set_gemma_tier
+    _gemma = is_gemma(model)
+    if not _gemma:
+        tokenizer = transformers.AutoTokenizer.from_pretrained(
+            model_args.model_name_or_path,
+            cache_dir=training_args.cache_dir,
+            model_max_length=training_args.model_max_length,
+            padding_side="right",
+            use_fast=False,
+        )
     processor = transformers.AutoProcessor.from_pretrained(
         model_args.model_name_or_path,
         cache_dir=training_args.cache_dir,
     )
     # Apply the pixel budget to the image processor (no per-call kwarg
     # in Qwen's processor; the image_processor reads these attributes).
-    if hasattr(processor, "image_processor"):
+    if _gemma:
+        # discrete tier (max_soft_tokens); right padding for the batched
+        # policy forward + tail-anchored answer masks.
+        set_gemma_tier(processor, phase_b1_args.max_soft_tokens)
+        processor.tokenizer.padding_side = "right"
+        if local_rank in (0, -1):
+            print(f"[phase_b1] Gemma-4 policy: max_soft_tokens="
+                  f"{phase_b1_args.max_soft_tokens}", flush=True)
+    elif hasattr(processor, "image_processor"):
         processor.image_processor.min_pixels = phase_b1_args.min_pixels
         processor.image_processor.max_pixels = phase_b1_args.max_pixels
 

@@ -1,0 +1,28 @@
+# Environment used for the Gemma-4-12B-it experiments (encoder-free backbone).
+# Python 3.12, CUDA 12.8.
+#
+# Notes that differ from the Qwen environments:
+#   * attention backend is sdpa - no flash-attn wheel is built for this stack,
+#     so every training / eval entry point passes attn_implementation=sdpa
+#     (JUDGE_ATTN=sdpa for the main-table judge as well);
+#   * no DeepSpeed - the Gemma RL stage trains only the twig and runs on plain
+#     torchrun DDP (scripts/train_rl_gemma4_12b.sh);
+#   * kornia provides the morphological ops used by the sparse RoI crop.
+torch==2.11.0
+torchvision==0.26.0
+transformers==5.15.0
+accelerate==1.14.0
+safetensors==0.7.0
+datasets==4.6.1
+numpy==2.2.6
+pillow==12.1.1
+scipy==1.15.3
+kornia==0.8.1
+tensorboard==2.20.0
+sentencepiece==0.2.1
+tqdm==4.67.1
+# evaluation framework (bundled fork): pip install -e lmms-eval
+pytablewriter==1.2.1
+mathruler==0.1.0
+pylatexenc==2.10
+loguru==0.7.3
