@@ -62,43 +62,10 @@ suffix), 2,048 new tokens; scoring = rule pass + Qwen3.5-9B LLM judge. See
 [docs/PROTOCOLS.md](docs/PROTOCOLS.md). Base-model, Vision-OPD and ZwZ rows are re-evaluated on
 released weights; other rows are quoted from their publications.
 
-| Model | Size | V* Bench | ZoomBench | HR-Bench 4K | HR-Bench 8K | MME-RW EN | MME-RW CN | Avg. |
-|---|---|---|---|---|---|---|---|---|
-| *Large-scale open / closed-source* | | | | | | | | |
-| GPT-5.4 | — | 77.0 | 52.7 | 84.0 | 77.9 | 74.2 | 70.9 | 72.8 |
-| Gemini-3.1-Pro | — | 88.0 | 61.2 | 89.6 | 86.9 | 76.5 | 73.3 | 79.3 |
-| Qwen3-VL-Instruct | 235B | 91.1 | 56.1 | 86.1 | 80.4 | 71.7 | 69.0 | 75.8 |
-| Qwen3.5 | 397B | 88.0 | 57.2 | 89.4 | 85.5 | 74.8 | 69.8 | 77.4 |
-| Kimi-K2.6 | 1T | 88.5 | 53.1 | 81.9 | 78.0 | 69.2 | 66.1 | 72.8 |
-| *Qwen2.5-VL based* | | | | | | | | |
-| DeepEyes | 7B | 85.9 | 46.5 | 75.1 | 72.6 | 64.1 | 64.1 | 68.1 |
-| Thyme | 7B | 82.2 | 45.1 | 77.0 | 72.0 | 64.8 | 64.6 | 67.6 |
-| DeepEyesV2 | 7B | 81.7 | 45.0 | 77.9 | 73.8 | 64.9 | 65.1 | 68.0 |
-| ZwZ | 7B | 86.9 | 55.6 | 75.9 | 72.4 | 65.0 | 63.5 | 69.9 |
-| **Vision-RL² (ours)** | 7B | 91.6 | 59.8 | 78.8 | 75.0 | 62.2 | 58.7 | 71.0 |
-| *Qwen3-VL based* | | | | | | | | |
-| Qwen3-VL-Instruct | 8B | 84.8 | 43.0 | 79.6 | 75.3 | 63.2 | 64.6 | 68.4 |
-| ZwZ | 8B | 90.6 | 58.0 | 84.4 | 81.6 | 69.9 | 69.2 | 75.6 |
-| P2R | 4B | 93.2 | – | 81.9 | 80.5 | – | – | – |
-| P2R | 8B | 93.7 | – | 81.5 | 82.6 | – | – | – |
-| *Qwen3.5 based* | | | | | | | | |
-| Qwen3.5 | 4B | 85.9 | 51.5 | 83.6 | 80.1 | 59.1 | 60.6 | 70.1 |
-| Qwen3.5 | 9B | 83.8 | 54.9 | 84.9 | 83.5 | 72.5 | 67.9 | 74.6 |
-| Vision-OPD | 4B | 90.6 | 59.5 | 82.0 | 79.1 | 74.2 | 70.6 | 76.0 |
-| Vision-OPD | 9B | 90.6 | 65.1 | 87.1 | 85.6 | 73.2 | 70.3 | 78.7 |
-| **Vision-RL² (ours)** | 4B | 91.1 | 65.1 | 84.3 | 80.3 | 65.8 | 65.3 | 75.3 |
-| **Vision-RL² (ours)** | 9B | **95.3** | **68.4** | 86.8 | 86.1 | 73.4 | 70.6 | **80.1** |
+<div align="center"><img src="project_page/assets/main_table.jpg" width="100%"></div>
 
 DeepEyes, ZwZ, P2R and Vision-OPD fine-tune the full MLLM; Vision-RL² updates only the small
-attached predictor.
-
-**Gemma-4-12B-it** (encoder-free; source tier 1120, RoI crop target 384 tokens):
-
-| Model | V* Bench | ZoomBench | HR-Bench 4K | HR-Bench 8K | MME-RW EN | MME-RW CN | Avg. |
-|---|---|---|---|---|---|---|---|
-| Gemma-4-12B-it (base) | 72.8 | 46.5 | 75.5 | 67.5 | 65.2 | 52.4 | 63.3 |
-| SD-RPN (stage 1), dense crop | 78.0 | 57.0 | 82.4 | 77.5 | 65.7 | 53.1 | 69.0 |
-| **Vision-RL² (ours)**, sparse crop | **82.2** | **60.7** | **85.0** | **79.4** | **67.6** | **61.6** | **72.8** |
+attached predictor. Gemma-4 rows use the model's largest visual-token tier (1,120 tokens).
 
 ### Training-aligned protocol (rule metrics, no judge)
 
