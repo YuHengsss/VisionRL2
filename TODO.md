@@ -97,4 +97,5 @@ Open follow-ups:
 ## Project page (project_page/)
 - [ ] Fill authors / affiliations / arXiv / BibTeX before release (`TODO(release)` in index.html)
 - [ ] Replace "coming soon" checkpoint cells with HF links
-- [ ] Enable GitHub Pages (main / project_page) when the repo goes public
+- [x] Page deployed at <https://yuhengsss.github.io/VisionRL2/> (copied into `VisionRL2/` of
+      the public `YuHengsss.github.io` repo, since this repository is private)

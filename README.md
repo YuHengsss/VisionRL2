@@ -4,7 +4,7 @@
 
 ### Region-Level Policy Optimization for Fine-grained MLLM Perception
 
-[arXiv] &nbsp;|&nbsp; [Project page](project_page/index.html)
+[arXiv] &nbsp;|&nbsp; [Project page](https://yuhengsss.github.io/VisionRL2/)
 
 <img src="project_page/assets/teaser_all.png" width="100%">
 
@@ -17,7 +17,7 @@
   ([`YuhengSSS/VisionRL2-data`](https://huggingface.co/datasets/YuhengSSS/VisionRL2-data)),
   plus `data_prep/` drivers that regenerate every one of them.
 - **Sep. 2026** &mdash; Gemma-4-12B-it (encoder-free backbone) support: SD-RPN twig, region-level RL, sparse RoI evaluation ([docs/GEMMA4.md](docs/GEMMA4.md)).
-- **Sep. 2026** &mdash; Code release: SD-RPN online pseudo-label training, the region-level RL stage for four backbones, both evaluation protocols, and the project page.
+- **Sep. 2026** &mdash; Code release: SD-RPN online pseudo-label training, the region-level RL stage for four backbones, both evaluation protocols, and the [project page](https://yuhengsss.github.io/VisionRL2/).
 
 ## TODO
 
