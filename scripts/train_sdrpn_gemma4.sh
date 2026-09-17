@@ -39,7 +39,7 @@ set -euo pipefail
 CODE_ROOT=${CODE_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}
 cd "${CODE_ROOT}"
 export PYTHONPATH="${CODE_ROOT}:${PYTHONPATH:-}"
-export QZOOM_REPO="${CODE_ROOT}"
+export VISIONRL2_REPO="${CODE_ROOT}"
 export PYTHONUNBUFFERED=1
 G="${CODE_ROOT}/qwen_src/gemma4_unified"
 

@@ -3,7 +3,7 @@
 Usage: python scripts/_make_id_shards.py <out_dir> <n_docs> <n_shards> <prefix>
 
 Each shard file <out_dir>/<prefix><i>.json holds the global document indices
-range(n_docs)[i::n_shards]; point QZOOM_DOC_IDS_FILE at one to evaluate only
+range(n_docs)[i::n_shards]; point VISIONRL2_DOC_IDS_FILE at one to evaluate only
 that slice (see lmms_eval/tasks/mme_realworld/utils.py:mme_realworld_slice).
 """
 

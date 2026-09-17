@@ -69,11 +69,11 @@ _KNOB_LIST: List[Knob] = [
     _mk("PROBE_CROP_MAX_UPSCALE_EDGE", "3", "Max per-edge upscale factor of the RoI crop under PROBE_CROP_TARGET_TOK.", "eval"),
     _mk("PROBE_CROP_SRC_CAP_DIV", "2", "Divisor on the source-cap term of the crop cap under PROBE_CROP_TARGET_TOK.", "eval"),
     # ---- Eval-time instrumentation --------------------------------------------
-    _mk("QZOOM_STAGE_TIMING", "", "If set and not '0'/'false', record per-sample stage latencies (cuda-synchronized) to a JSONL sidecar.", "eval"),
-    _mk("QZOOM_STAGE_TIMING_DIR", "./logs/stage_timing", "Output dir for the stage-timing sidecars.", "eval"),
-    _mk("QZOOM_STAGE_TIMING_WARMUP", "2", "Number of leading samples excluded from stage-timing aggregation.", "eval"),
-    _mk("QZOOM_RUN_TAG", None, "Tag stamped into stage-timing sidecar filenames; site default is a timestamp.", "eval"),
-    _mk("QZOOM_EVAL_PREFETCH", "4", "Worker threads prefetching the CPU stage (image load + processor) in the lmms-eval chat wrappers; 0 = synchronous.", "eval"),
+    _mk("VISIONRL2_STAGE_TIMING", "", "If set and not '0'/'false', record per-sample stage latencies (cuda-synchronized) to a JSONL sidecar.", "eval"),
+    _mk("VISIONRL2_STAGE_TIMING_DIR", "./logs/stage_timing", "Output dir for the stage-timing sidecars.", "eval"),
+    _mk("VISIONRL2_STAGE_TIMING_WARMUP", "2", "Number of leading samples excluded from stage-timing aggregation.", "eval"),
+    _mk("VISIONRL2_RUN_TAG", None, "Tag stamped into stage-timing sidecar filenames; site default is a timestamp.", "eval"),
+    _mk("VISIONRL2_EVAL_PREFETCH", "4", "Worker threads prefetching the CPU stage (image load + processor) in the lmms-eval chat wrappers; 0 = synchronous.", "eval"),
     # ---- Model-forward / online-supervision behavior -------------------------
     _mk("SKIP_POST_BRANCH", "1", "If '1', skip the post-twig LM layers when only the twig heatmap is needed (RL policy forward); the zero-loss fallback routes via twig_hidden.", "train"),
     _mk("SINGLE_REGION_EXTRACT_SIGMA", "0.0", "Gaussian sigma used when extracting the single-region (v2) online label from the attention heatmap; 0 = no smoothing.", "train"),
@@ -89,8 +89,8 @@ _KNOB_LIST: List[Knob] = [
     _mk("LABEL_VERSION_MAP", "", "Optional dataset->label-version map (parsed downstream).", "data"),
     # ---- Training driver -----------------------------------------------------
     _mk("ATTN_IMPL", "flash_attention_2", "attn_implementation passed to model load.", "train"),
-    _mk("QZOOM_DISABLE_CAUSAL_CONV1D", "0", "If '1', force the torch fallback for the qwen3.5 linear-attention conv path even when causal-conv1d is installed (reference training kernel).", "train"),
-    _mk("QZOOM_DISABLE_REWARD_MASK_IP_CAP", "0", "If '1', skip registering the reward image_processor cap for _build_masked_pils (masked PILs built from the uncapped source image).", "train"),
+    _mk("VISIONRL2_DISABLE_CAUSAL_CONV1D", "0", "If '1', force the torch fallback for the qwen3.5 linear-attention conv path even when causal-conv1d is installed (reference training kernel).", "train"),
+    _mk("VISIONRL2_DISABLE_REWARD_MASK_IP_CAP", "0", "If '1', skip registering the reward image_processor cap for _build_masked_pils (masked PILs built from the uncapped source image).", "train"),
     # ---- Region-level RL -----------------------------------------------------
     _mk("RLG_DATA_BASE", None, "Base dir for region-level RL data (unset -> None).", "data"),
     _mk("REWARD_CE_CHUNK", "1", "Chunk size for the reward-model CE forward.", "train"),

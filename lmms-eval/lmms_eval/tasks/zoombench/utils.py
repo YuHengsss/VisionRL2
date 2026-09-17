@@ -109,22 +109,22 @@ def zoombench_doc_to_text_std(doc, lmms_eval_specific_kwargs=None):
     return doc["query"].strip()
 
 
-def _qzoom_doc_ids(dataset):
+def _visionrl2_doc_ids(dataset):
     """Shared env-gated doc-subset selector.
 
-    QZOOM_DOC_IDS_FILE : path to a json list of dataset indices (precedence)
-    QZOOM_DOC_IDS      : comma-separated dataset indices
+    VISIONRL2_DOC_IDS_FILE : path to a json list of dataset indices (precedence)
+    VISIONRL2_DOC_IDS      : comma-separated dataset indices
     Neither set -> None (caller returns the dataset unchanged).
     Indices are de-duplicated and sorted, so the k-th doc of the resulting
     subset is sorted(ids)[k] -- the mapping used to splice results back.
     """
     import json as _json
     import os as _os
-    f = _os.environ.get("QZOOM_DOC_IDS_FILE", "")
+    f = _os.environ.get("VISIONRL2_DOC_IDS_FILE", "")
     if f:
         ids = _json.load(open(f))
     else:
-        s = _os.environ.get("QZOOM_DOC_IDS", "")
+        s = _os.environ.get("VISIONRL2_DOC_IDS", "")
         if not s:
             return None
         ids = [int(x) for x in s.split(",") if x.strip()]
@@ -134,7 +134,7 @@ def _qzoom_doc_ids(dataset):
 def zoombench_slice(dataset):
     """Targeted doc-subset re-runs (e.g. regenerating decode-truncated
     samples). Env-gated; no env -> full dataset, identical to zoombench_vopd."""
-    ids = _qzoom_doc_ids(dataset)
+    ids = _visionrl2_doc_ids(dataset)
     if ids is None:
         return dataset
     return dataset.select(ids)

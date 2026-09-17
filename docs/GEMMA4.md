@@ -115,7 +115,7 @@ to the results: pass-1 prefill, RoI extraction, crop tier, pass-2 tokens and pre
 latency.
 
 MME-RealWorld EN/CN dominate the main-table wall clock, so `main_eval_gemma4.sh` splits them
-into round-robin id shards (`QZOOM_DOC_IDS_FILE`, built by `scripts/_make_id_shards.py`) that
+into round-robin id shards (`VISIONRL2_DOC_IDS_FILE`, built by `scripts/_make_id_shards.py`) that
 run concurrently over the GPUs. Each shard's sample file is renamed with the shard tag because
 the judge keys rows by `(file name, doc_id)` and would otherwise refuse the duplicate ids.
 

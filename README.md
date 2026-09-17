@@ -125,11 +125,22 @@ hf download YuhengSSS/VisionRL2-data --repo-type dataset --local-dir data/Vision
 mkdir -p data/ev_maps
 for t in data/VisionRL2-data/ev_maps/*.tar; do tar -xf "$t" -C data/ev_maps; done
 
-# images (VisualCoT sources)
-hf download YuhengSSS/RoITraining --repo-type dataset --local-dir data/RoITraining
-mkdir -p datasets
-for t in data/RoITraining/*.tar; do tar -xf "$t" -C datasets; done
+# images (VisualCoT sources): only the four archives the pipeline reads (~28 GB total)
+hf download YuhengSSS/RoITraining --repo-type dataset --local-dir data/RoITraining \
+  --include gqa.tar --include textvqa.tar --include infographicsvqa.tar \
+  --include spdocvqa_images.tar.gz
+
+mkdir -p datasets datasets/DocVQA
+tar -xf data/RoITraining/gqa.tar             -C datasets   # -> datasets/gqa/images/
+tar -xf data/RoITraining/textvqa.tar         -C datasets   # -> datasets/textvqa/train_images/
+tar -xf data/RoITraining/infographicsvqa.tar -C datasets   # -> datasets/infographicsvqa/infographicsvqa_images/
+tar -xzf data/RoITraining/spdocvqa_images.tar.gz -C datasets/DocVQA   # flat *.png -> datasets/DocVQA/
 ```
+
+`RoITraining` also holds ~66 other files (label jsonl/pkl bundles and image archives for
+other projects, ~74 GB in total); none of them are needed here, so do not clone the whole
+repo. The four archives above are `gqa.tar` (10.3 GB), `spdocvqa_images.tar.gz` (8.6 GB),
+`textvqa.tar` (7.1 GB) and `infographicsvqa.tar` (2.0 GB).
 
 `DATASET_ROOT` (default `datasets`) then holds one folder per source dataset
 (`gqa/images/`, `DocVQA/`, `textvqa/train_images/`, `infographicsvqa/infographicsvqa_images/`),

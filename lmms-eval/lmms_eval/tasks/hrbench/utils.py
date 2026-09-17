@@ -118,14 +118,14 @@ def hrbench_aggregate_results(results, args):
 
 
 def hrbench_slice(dataset):
-    """Doc subset selection via QZOOM_DOC_IDS_FILE (json list of indices),
+    """Doc subset selection via VISIONRL2_DOC_IDS_FILE (json list of indices),
     for targeted probe runs; scoring happens offline."""
     import os, json
-    f = os.environ.get("QZOOM_DOC_IDS_FILE", "")
+    f = os.environ.get("VISIONRL2_DOC_IDS_FILE", "")
     if f:
         ids = sorted(i for i in json.load(open(f)) if i < len(dataset))
         return dataset.select(ids)
-    s = os.environ.get("QZOOM_DOC_IDS", "")
+    s = os.environ.get("VISIONRL2_DOC_IDS", "")
     if s:
         ids = sorted({int(x) for x in s.split(",") if x.strip()})
         return dataset.select([i for i in ids if 0 <= i < len(dataset)])
@@ -135,7 +135,7 @@ def hrbench_slice(dataset):
 
 def _hrbench_stride(dataset):
     import os
-    st = os.environ.get("QZOOM_DOC_STRIDE", "")
+    st = os.environ.get("VISIONRL2_DOC_STRIDE", "")
     if not st:
         return None
     k, m = st.split(":")

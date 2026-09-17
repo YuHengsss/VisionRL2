@@ -1,6 +1,6 @@
 """Env-gated stage-wise latency instrumentation for the two-stage RoI path.
 
-Enable with QZOOM_STAGE_TIMING=1. When the flag is unset (or "0"), every hook
+Enable with VISIONRL2_STAGE_TIMING=1. When the flag is unset (or "0"), every hook
 degenerates to a cached-boolean check and the eval pipeline is unperturbed
 (no torch.cuda.synchronize calls are issued).
 
@@ -42,7 +42,7 @@ import time
 
 import torch
 
-_ENABLED = os.environ.get("QZOOM_STAGE_TIMING", "") not in ("", "0", "false", "False")
+_ENABLED = os.environ.get("VISIONRL2_STAGE_TIMING", "") not in ("", "0", "false", "False")
 
 # Stages that are additive within one sample (t_total is computed separately).
 # Key order/names are fixed (the latency figure scripts consume them).
@@ -161,12 +161,12 @@ _WRITER = {"path": None}
 
 
 def out_dir() -> str:
-    return os.environ.get("QZOOM_STAGE_TIMING_DIR", "./logs/stage_timing")
+    return os.environ.get("VISIONRL2_STAGE_TIMING_DIR", "./logs/stage_timing")
 
 
 def warmup_n() -> int:
     try:
-        return int(os.environ.get("QZOOM_STAGE_TIMING_WARMUP", "2"))
+        return int(os.environ.get("VISIONRL2_STAGE_TIMING_WARMUP", "2"))
     except Exception:
         return 2
 
@@ -175,7 +175,7 @@ def _path(rank: int = 0) -> str:
     if _WRITER["path"] is None:
         d = out_dir()
         os.makedirs(d, exist_ok=True)
-        tag = os.environ.get("QZOOM_RUN_TAG", time.strftime("%Y%m%d_%H%M%S"))
+        tag = os.environ.get("VISIONRL2_RUN_TAG", time.strftime("%Y%m%d_%H%M%S"))
         _WRITER["path"] = os.path.join(d, f"stage_timing_{tag}_rank{rank}.jsonl")
     return _WRITER["path"]
 
@@ -198,7 +198,7 @@ def write_runinfo(info: dict, rank: int = 0) -> None:
     try:
         d = out_dir()
         os.makedirs(d, exist_ok=True)
-        tag = os.environ.get("QZOOM_RUN_TAG", time.strftime("%Y%m%d_%H%M%S"))
+        tag = os.environ.get("VISIONRL2_RUN_TAG", time.strftime("%Y%m%d_%H%M%S"))
         base = dict(info)
         base.setdefault("timestamp", time.strftime("%Y-%m-%d %H:%M:%S"))
         base.setdefault("warmup_samples", warmup_n())

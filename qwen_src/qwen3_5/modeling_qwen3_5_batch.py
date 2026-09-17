@@ -24,9 +24,9 @@ import os
 
 # --- Q-Zoom centralized env-knob accessor (Phase A) ---
 try:
-    from qwen_src.qzoom_config import getenv as qz_getenv
+    from qwen_src.visionrl2_config import getenv as qz_getenv
 except ImportError:  # pragma: no cover
-    from qzoom_config import getenv as qz_getenv
+    from visionrl2_config import getenv as qz_getenv
 from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any, Optional, Union
@@ -34,7 +34,7 @@ from typing import Any, Optional, Union
 # SD-RPN integration. Only the targeted edits below differ from the
 # upstream Qwen3.5 modeling file.
 
-# Env-gated stage-wise latency instrumentation (QZOOM_STAGE_TIMING=1).
+# Env-gated stage-wise latency instrumentation (VISIONRL2_STAGE_TIMING=1).
 # Every hook below is a cached-boolean check when the flag is unset, so
 # normal evals are bit-identical and pay no synchronize() cost.
 from qwen_src import stage_timing as qzt
@@ -67,11 +67,11 @@ from transformers.utils.output_capturing import capture_outputs
 from .configuration_qwen3_5 import Qwen3_5Config, Qwen3_5TextConfig, Qwen3_5VisionConfig
 
 
-# QZOOM_DISABLE_CAUSAL_CONV1D=1 forces the torch fallback for the linear-attention
+# VISIONRL2_DISABLE_CAUSAL_CONV1D=1 forces the torch fallback for the linear-attention
 # conv path even when causal-conv1d is installed. The June-2026 champion RL runs
 # trained in an env WITHOUT causal-conv1d (torch fallback numerics); envs that have
 # it silently switch kernels and shift every forward. Default "0" = unchanged.
-if is_causal_conv1d_available() and qz_getenv("QZOOM_DISABLE_CAUSAL_CONV1D", "0") != "1":
+if is_causal_conv1d_available() and qz_getenv("VISIONRL2_DISABLE_CAUSAL_CONV1D", "0") != "1":
     from causal_conv1d import causal_conv1d_fn, causal_conv1d_update
 else:
     causal_conv1d_update, causal_conv1d_fn = None, None

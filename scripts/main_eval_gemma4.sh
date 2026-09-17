@@ -6,7 +6,7 @@
 # no short-answer suffix, rule pass + Qwen3.5-9B judge), adapted to the
 # encoder-free backbone: source tier 1120, RoI crop target 384 tokens, sdpa
 # attention. MME-RealWorld EN / CN are long, so they are split into id shards
-# (QZOOM_DOC_IDS_FILE) that run concurrently over the GPUs; the judge reads the
+# (VISIONRL2_DOC_IDS_FILE) that run concurrently over the GPUs; the judge reads the
 # whole output tree at the end.
 #
 # Arms:
@@ -78,7 +78,7 @@ run_leg() {          # task shard_tag gpu [ids_file]
   local TASK=$1 TAG=$2 GPU=$3 IDS=${4:-}
   local LEG="${OUT_ROOT}/leg_${TASK}_${TAG}"
   mkdir -p "${LEG}"
-  env ${IDS:+QZOOM_DOC_IDS_FILE=${IDS}} GEMMA_TIMING_OUT="${LEG}/timing.jsonl" \
+  env ${IDS:+VISIONRL2_DOC_IDS_FILE=${IDS}} GEMMA_TIMING_OUT="${LEG}/timing.jsonl" \
       CUDA_VISIBLE_DEVICES=${GPU} python -m lmms_eval \
       --model gemma4 --model_args "${MODEL_ARGS}" --tasks "${TASK}" \
       --batch_size 1 --log_samples --log_samples_suffix "${ARM}_${TAG}" \
