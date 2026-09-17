@@ -1,7 +1,7 @@
 """Generate [Visual Evidence] responses for the FULL qwen2.5-VL-7B RL pool.
 
 The qwen2.5-VL-7B phase-A RL pool
-(``qwen2_5vl-7b-roi-K18T3-stage1/filtered.jsonl``, 8138 unique
+(``qwen2_5vl-7b-sdrpn-K18T3/filtered.jsonl``, 8138 unique
 (dataset, image, question) samples over docvqa / textvqa / infographicsvqa)
 has no evidence-format responses yet. This regenerates ALL of them with the
 VISUAL_EVIDENCE_SUFFIX prompt so the multi-layer response->image cache step
@@ -18,7 +18,7 @@ Keyed by (dataset, image basename, question) to match the cache step's join.
 
 Usage (one process per GPU):
   CUDA_VISIBLE_DEVICES=2 python excluded/multi_group/gen_pool_evidence_q25_7b.py \
-      --pool output/region_level_grpo/qwen2_5vl-7b-roi-K18T3-stage1/filtered.jsonl \
+      --pool output/region_level_grpo/qwen2_5vl-7b-sdrpn-K18T3/filtered.jsonl \
       --out output/region_level_grpo/phase_a_v2_responses/pool_evidence_q25_7b_shard0.jsonl \
       --shard-idx 0 --num-shards 4
 """

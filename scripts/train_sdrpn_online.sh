@@ -80,7 +80,7 @@ MODEL_MAX_LENGTH=${MODEL_MAX_LENGTH:-2048}
 GRAD_CKPT=${GRAD_CKPT:-True}
 
 # ---- output -------------------------------------------------------------------
-RUN_NAME=${RUN_NAME:-${MODEL}-sdrpn-K${TWIG_K}T${TWIG_T}-online}
+RUN_NAME=${RUN_NAME:-${MODEL}-sdrpn-K${TWIG_K}T${TWIG_T}}
 OUTPUT_DIR=${OUTPUT_DIR:-${OUTPUT_ROOT:-output}/sdrpn/${RUN_NAME}}
 mkdir -p "${OUTPUT_DIR}"
 

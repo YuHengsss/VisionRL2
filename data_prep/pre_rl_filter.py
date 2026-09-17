@@ -35,7 +35,7 @@ CLI examples::
     # Stage 1 — shard 0 of 3 on GPU 1
     CUDA_VISIBLE_DEVICES=1 python data_prep/pre_rl_filter.py \\
         --mode score \\
-        --model-path output/sdrpn/qwen3_5-4b-sdrpn-K21T3-online \\
+        --model-path output/sdrpn/qwen3_5-4b-sdrpn-K21T3 \\
         --model-family qwen3_5 \\
         --input-jsonl data/VisionRL2-data/rl_pools/candidates_visualcot_50k.jsonl \\
         --shard-id 0 --num-shards 3
@@ -43,7 +43,7 @@ CLI examples::
     # Stage 2 — aggregate (after all 3 shards done)
     python data_prep/pre_rl_filter.py \\
         --mode aggregate \\
-        --model-path output/sdrpn/qwen3_5-4b-sdrpn-K21T3-online
+        --model-path output/sdrpn/qwen3_5-4b-sdrpn-K21T3
 """
 
 from __future__ import annotations

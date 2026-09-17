@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-# SD-RPN (stage 1) for Gemma-4-12B-it - the "v4mix" corpus recipe.
+# SD-RPN (stage 1) for Gemma-4-12B-it.
 #
 # Gemma-4 is encoder-free: the processor turns an image into a fixed number of
 # soft visual tokens, picked from the discrete tiers {70, 140, 280, 560, 1120}
@@ -45,12 +45,12 @@ G="${CODE_ROOT}/qwen_src/gemma4_unified"
 
 BASE_MODEL=${BASE_MODEL:-google/gemma-4-12B-it}
 IMAGE_ROOT=${IMAGE_ROOT:-datasets}                 # parent of the per-dataset image folders
-CORPUS_DIR=${CORPUS_DIR:-data/sdrpn/gemma4_v4mix}  # generated responses land here
+CORPUS_DIR=${CORPUS_DIR:-data/sdrpn/gemma4_12b}   # generated responses land here
 INPUT_V1=${INPUT_V1:-${CORPUS_DIR}/input_v1.jsonl}
 INPUT_V2=${INPUT_V2:-${CORPUS_DIR}/input_v2.jsonl}
 TRAIN_JSONL=${TRAIN_JSONL:-data/VisionRL2-data/sdrpn_corpora/gemma4_12b_response_corpus.jsonl}
-OUT_DIR=${OUT_DIR:-output/sdrpn/gemma4-12b-roi-K27T3-stage1-v4mix}
-OUT_FULL=${OUT_FULL:-${OUT_DIR}-full}
+OUT_DIR=${OUT_DIR:-output/sdrpn/gemma4-12b-sdrpn-K27T3-delta}   # twig-delta training dir
+OUT_FULL=${OUT_FULL:-output/sdrpn/gemma4-12b-sdrpn-K27T3}     # assembled, loadable ckpt
 GPU_IDS=${GPU_IDS:-0,1}
 TIER=${TIER:-560}                                  # stage-1 soft-token tier
 TWIG_K=${TWIG_K:-27}; TWIG_T=${TWIG_T:-3}; KEEP_LAYERS=${KEEP_LAYERS:-30}

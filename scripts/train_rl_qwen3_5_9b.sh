@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Region-level RL on Qwen3.5-9B (paper checkpoint: q9b-placebo100-s42-full).
-export PHASE_A_CKPT=${PHASE_A_CKPT:-output/sdrpn/qwen3_5-9b-sdrpn-K21T3-online}
+# Region-level RL on Qwen3.5-9B (stage 2; control-margin scale kappa = 1.0).
+export PHASE_A_CKPT=${PHASE_A_CKPT:-output/sdrpn/qwen3_5-9b-sdrpn-K21T3}
 export FILTERED_JSONL=${FILTERED_JSONL:-data/VisionRL2-data/rl_pools/rl_pool_qwen3_5_9b.jsonl}
 export EV_MAPS_ROOT=${EV_MAPS_ROOT:-data/ev_maps}
 export DATASET_ROOT=${DATASET_ROOT:-datasets}

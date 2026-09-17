@@ -20,7 +20,7 @@
 # PYTHONHASHSEED is pinned: pre_rl_filter's stratified shuffle seeds with
 # hash(source), so every shard must see the same candidate order.
 #
-#   PHASE_A_CKPT=output/sdrpn/gemma4-12b-roi-K27T3-stage1-v4mix-full \
+#   PHASE_A_CKPT=output/sdrpn/gemma4-12b-sdrpn-K27T3 \
 #   SOURCE_JSONL=data/VisionRL2-data/rl_pools/candidates_visualcot_50k.jsonl \
 #   IMAGE_ROOT=datasets \
 #   GPU_IDS=0,1,2,3 bash data_prep/build_pool_gemma4.sh
@@ -35,7 +35,7 @@ export PYTHONPATH="${CODE_ROOT}:${CODE_ROOT}/qwen-vl-finetune:${PYTHONPATH:-}"
 export PYTHONUNBUFFERED=1
 export PYTHONHASHSEED=0
 
-PHASE_A_CKPT=${PHASE_A_CKPT:?assembled Gemma SD-RPN checkpoint dir}
+PHASE_A_CKPT=${PHASE_A_CKPT:-output/sdrpn/gemma4-12b-sdrpn-K27T3}
 BASE_MODEL=${BASE_MODEL:-google/gemma-4-12B-it}
 SOURCE_JSONL=${SOURCE_JSONL:-data/VisionRL2-data/rl_pools/candidates_visualcot_50k.jsonl}
 IMAGE_ROOT=${IMAGE_ROOT:-datasets}

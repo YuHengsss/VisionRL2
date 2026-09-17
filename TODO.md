@@ -17,7 +17,7 @@ Published as [`YuhengSSS/VisionRL2-data`](https://huggingface.co/datasets/Yuheng
 - [x] SD-RPN corpora (`sdrpn_corpora/qwen3_5_{4b,9b}_response_corpus.jsonl`,
       `gemma4_12b_response_corpus.jsonl`) + the 50k candidate set
       (`rl_pools/candidates_visualcot_50k.jsonl`); VisualCoT image layout documented in the
-      dataset card and in README "Data".
+      dataset card and in `data_prep/README.md`.
 - [x] `data_prep/` regenerates every released file:
       - `qwen_heatmap.py` (in `region_level_grpo/`) replaces the external
         `qzoom_demo.qzoom_wrapper` dependency; `pre_rl_filter.py` dispatches on
@@ -28,10 +28,10 @@ Published as [`YuhengSSS/VisionRL2-data`](https://huggingface.co/datasets/Yuheng
         `run_cache_q25_7b.sh`, `run_gen_evidence_q25_7b.sh`,
         `run_make_vcot50k_response_qwen35.sh` (all deleted); `make_filtered_v2.py` is now
         `compose_pool.py` with a required `--stats-dir`.
-      - no absolute CityU paths remain in `data_prep/` (image roots come from
+      - no absolute machine-specific paths remain in `data_prep/` (image roots come from
         `DATASET_ROOT` via the `DS_IMAGE_ROOTS` mapping).
 - [x] The corpus / pool schema and the `EV_MAPS_ROOT` convention are documented in the
-      dataset card and README "Data" (a separate `docs/DATA.md` was not needed).
+      dataset card and in `data_prep/README.md` (a separate `docs/DATA.md` was not needed).
 
 Open follow-ups:
 - [ ] Smoke the new `data_prep` drivers on a GPU box (only `bash -n` / `py_compile` so far) -
@@ -43,12 +43,12 @@ Open follow-ups:
       7B-selected pool from `build_pool_qwen2_5_vl.sh START=filter`.
 
 ## 2. Checkpoint release (HF)
-- [ ] SD-RPN (Phase-A) checkpoints: `qwen3_5-4b ... v4mix-jun2`, `qwen3_5-9b ... v4mix-jun4`,
-      `qwen2_5vl-7b-roi-K18T3-stage1`.
-- [ ] RL checkpoints: `q35vl-4b-v4pa-placebo125-s42-full`, `q9b-placebo100-s42-full`,
-      `q25vl-7b-fin-placebo100-s42`.
-- [ ] Gemma-4-12B checkpoints: SD-RPN `gemma4-12b-roi-K27T3-stage1-v4mix(-full)` and RL
-      `gemma4-12b-v4mix-rl-k1p0`. Stage 1 already writes a twig-only delta
+- [ ] SD-RPN (stage-1) checkpoints: `qwen3_5-4b-sdrpn-K21T3`, `qwen3_5-9b-sdrpn-K21T3`,
+      `qwen2_5vl-7b-sdrpn-K18T3`.
+- [ ] RL (stage-2) checkpoints for Qwen3.5-4B (kappa 1.25), Qwen3.5-9B (kappa 1.0) and
+      Qwen2.5-VL-7B (kappa 1.0).
+- [ ] Gemma-4-12B checkpoints: SD-RPN `gemma4-12b-sdrpn-K27T3(-delta)` and the RL run
+      (kappa 1.0). Stage 1 already writes a twig-only delta
       (`twig_delta_final.pt`, ~1.4 GB) reassembled by
       `qwen_src/gemma4_unified/assemble_full_checkpoint.py` - publish the delta, not the
       24 GB full directory.
@@ -72,8 +72,8 @@ Open follow-ups:
       loss_anchor_k1 / K / n_actions / supp_n / winnability_w identical at every step.
 - [x] 2026-09-02 Eval reproduction (training-aligned @576, 4B RL checkpoint, release `eval.sh`):
       V* 85.34, ZoomBench 61.78 = the paper cells (85.34 / 61.78).
-- [x] 2026-09-02 Loss-curve check vs the ORIGINAL 4B RL run (`q35vl-4b-v4pa-placebo125-s42`,
-      TensorBoard, 2026-07-24), identical launch (4 GPUs x bs 8, full pool, seed 42), 25 steps:
+- [x] 2026-09-02 Loss-curve check vs the ORIGINAL 4B RL run (TensorBoard, 2026-07-24),
+      identical launch (4 GPUs x bs 8, full pool, seed 42), 25 steps:
       release trainer == research trainer run today at every step (max |diff| = 0.0 on loss /
       reward_mean / loss_policy / loss_kl). Both match the July log exactly at steps 1-2 and
       then diverge identically from step 3 (region gating is discontinuous, so bf16 + ZeRO-2 +

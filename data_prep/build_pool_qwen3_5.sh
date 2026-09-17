@@ -22,7 +22,7 @@
 # PYTHONHASHSEED is pinned: pre_rl_filter's stratified shuffle seeds with
 # hash(source), so every shard must see the same candidate order.
 #
-#   PHASE_A_CKPT=output/sdrpn/qwen3_5-4b-sdrpn-K21T3-online \
+#   PHASE_A_CKPT=output/sdrpn/qwen3_5-4b-sdrpn-K21T3 \
 #   BASE_MODEL=Qwen/Qwen3.5-4B \
 #   CORPUS=data/VisionRL2-data/sdrpn_corpora/qwen3_5_4b_response_corpus.jsonl \
 #   DATASET_ROOT=datasets GPU_IDS=0,1,2,3 bash data_prep/build_pool_qwen3_5.sh
