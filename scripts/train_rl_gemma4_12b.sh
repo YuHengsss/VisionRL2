@@ -11,7 +11,7 @@ CODE_ROOT=${CODE_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}
 cd "${CODE_ROOT}"
 export PYTHONPATH="${CODE_ROOT}:${CODE_ROOT}/qwen-vl-finetune:${PYTHONPATH:-}"
 
-export PHASE_A_CKPT=${PHASE_A_CKPT:?assembled Gemma SD-RPN checkpoint dir}
+export PHASE_A_CKPT=${PHASE_A_CKPT:-output/sdrpn/gemma4-12b-sdrpn-K27T3}
 export FILTERED_JSONL=${FILTERED_JSONL:-data/VisionRL2-data/rl_pools/rl_pool_gemma4_12b.jsonl}
 export DATASET_ROOT=${DATASET_ROOT:-datasets}
 export EV_MAPS_ROOT=${EV_MAPS_ROOT:-data/ev_maps}

@@ -45,7 +45,7 @@ GQA_BBOX_SUFFIX = (
     "x_min y_min x_max y_max {detail_label}."
 )
 SINGLE_WORD_SUFFIX = "Answer the question using a single word or phrase."
-# v2 (evidence-format) prompt suffix of the q35 v4mix corpus. Always
+# v2 (evidence-format) prompt suffix of the stage-1 corpus. Always
 # stripped at train time (STRIP_EVIDENCE_SUFFIX_PROB, default 1.0) so the
 # twig sees the bare question, exactly as in the qwen3.5 recipe.
 VISUAL_EVIDENCE_SUFFIX = (
@@ -154,7 +154,7 @@ class GemmaStage1Dataset(Dataset):
         img_path = os.path.join(self.image_root, rec["image"])
         img = Image.open(img_path).convert("RGB")
         original_image_size = img.size  # (w, h) BEFORE expand2square
-        # v4mix convention: v1 rows (gqa/textvqa, bbox / single-word
+        # Corpus convention: v1 rows (gqa/textvqa, bbox / single-word
         # prompts) are expand2square-padded; v2 rows (docvqa/infovqa,
         # evidence prompts) are fed unpadded. Legacy corpora without a
         # "version" field are treated as v1.

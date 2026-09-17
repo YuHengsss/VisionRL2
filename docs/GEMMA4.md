@@ -29,9 +29,11 @@ token, RoPE applied, score scaled by `self_attn.scaling` (1.0); the grid `(gh, g
 cell order come from `image_position_ids`. Only the twig is trained; the backbone is frozen
 throughout both stages.
 
-Training writes a **twig delta** (`twig_delta_final.pt`, ~1.4 GB). Turn it into a loadable
-checkpoint with `qwen_src/gemma4_unified/assemble_full_checkpoint.py --delta <pt> --out <dir>`,
-which merges the delta onto the base snapshot (the `-full` directory the scripts expect).
+Training writes a **twig delta** (`twig_delta_final.pt`, ~1.4 GB) into
+`output/sdrpn/gemma4-12b-sdrpn-K27T3-delta`. Turn it into a loadable checkpoint with
+`qwen_src/gemma4_unified/assemble_full_checkpoint.py --delta <pt> --out <dir>`, which merges the
+delta onto the base snapshot; `scripts/train_sdrpn_gemma4.sh` runs that as its `assemble` stage
+and writes `output/sdrpn/gemma4-12b-sdrpn-K27T3`, the directory every downstream script loads.
 
 ## Stage 1: Phase-A at tier 560
 

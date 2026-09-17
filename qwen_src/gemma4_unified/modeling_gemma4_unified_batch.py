@@ -1753,7 +1753,7 @@ class Gemma4UnifiedForConditionalGeneration(Gemma4UnifiedPreTrainedModel, Genera
         dataset_modes = kwargs.pop("dataset_modes", None)
         original_image_sizes = kwargs.pop("original_image_sizes", None)
         roi_target_map = kwargs.pop("roi_target_map", None)
-        # v4mix per-row label dispatch: "v1" mean-over-tokens label,
+        # Per-row label dispatch: "v1" mean-over-tokens label,
         # "v2" per-token single-region union label (+ prefix skip).
         label_versions = kwargs.pop("label_versions", None)
         label_skips = kwargs.pop("label_skips", None)

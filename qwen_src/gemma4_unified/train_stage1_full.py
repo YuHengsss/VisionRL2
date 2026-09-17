@@ -47,9 +47,9 @@ MODEL_ID = "google/gemma-4-12B-it"
 
 def parse_args():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--jsonl", default="data/sdrpn/gemma4_v4mix/gemma12b_it_560_v4mix_train.jsonl")
+    ap.add_argument("--jsonl", default="data/sdrpn/gemma4_12b/gemma12b_it_560_train.jsonl")
     ap.add_argument("--image-root", required=True)
-    ap.add_argument("--out-dir", default="output/sdrpn/gemma4-12b-roi-K27T3-stage1")
+    ap.add_argument("--out-dir", default="output/sdrpn/gemma4-12b-sdrpn-K27T3-delta")
     ap.add_argument("--micro-batch", type=int, default=2)
     ap.add_argument("--accum", type=int, default=4)
     ap.add_argument("--epochs", type=int, default=1)

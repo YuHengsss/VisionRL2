@@ -19,7 +19,7 @@ checkpoint directory:
 
 Usage:
   python assemble_full_checkpoint.py --delta .../twig_delta_final.pt \
-      --out output/sdrpn/gemma4-12b-roi-K27T3-stage1-full
+      --out output/sdrpn/gemma4-12b-sdrpn-K27T3
 """
 from __future__ import annotations
 

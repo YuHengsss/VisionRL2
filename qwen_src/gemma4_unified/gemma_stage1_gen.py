@@ -160,7 +160,7 @@ def _load_one(rec, image_roots, expand2square_flag, pre_resize_max_pixels):
 
 def _build_prompt(rec, processor, enable_thinking):
     ds = rec.get("dataset", "")
-    # v4mix: a row may carry its own prompt (e.g. the v2 evidence prompt); use it verbatim.
+    # A row may carry its own prompt (e.g. the v2 evidence prompt); use it verbatim.
     prompted_q = rec.get("prompted_question") or build_prompted_question(rec["question"], ds)
     messages = [{"role": "user", "content": [
         {"type": "image"},

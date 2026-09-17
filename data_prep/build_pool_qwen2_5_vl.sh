@@ -18,7 +18,7 @@
 #   maps      response-to-image attention maps (layers 18..23) cached to disk;
 #             writes the final pool with an `ev_maps_path` per row
 #
-#   PHASE_A_CKPT=output/sdrpn/qwen2_5vl-7b-roi-K18T3-stage1 \
+#   PHASE_A_CKPT=output/sdrpn/qwen2_5vl-7b-sdrpn-K18T3 \
 #   DATASET_ROOT=datasets GPU_IDS=0,1,2,3 bash data_prep/build_pool_qwen2_5_vl.sh
 #
 # NOTE on the released pool: `rl_pool_qwen2_5_vl_7b.jsonl` reuses the

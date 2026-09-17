@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Region-level RL on Qwen2.5-VL-7B (paper checkpoint: q25vl-7b-fin-placebo100-s42).
-# Uses the released SD-RPN checkpoint qwen2_5vl-7b-roi-K18T3-stage1 as init and the
+# Region-level RL on Qwen2.5-VL-7B (stage 2; control-margin scale kappa = 1.0).
+# Uses the released SD-RPN checkpoint qwen2_5vl-7b-sdrpn-K18T3 as init and the
 # transformers-4.51 environment (requirements_qwen2_5vl.txt).
-export PHASE_A_CKPT=${PHASE_A_CKPT:-output/sdrpn/qwen2_5vl-7b-roi-K18T3-stage1}
+export PHASE_A_CKPT=${PHASE_A_CKPT:-output/sdrpn/qwen2_5vl-7b-sdrpn-K18T3}
 export FILTERED_JSONL=${FILTERED_JSONL:-data/VisionRL2-data/rl_pools/rl_pool_qwen2_5_vl_7b.jsonl}
 export EV_MAPS_ROOT=${EV_MAPS_ROOT:-data/ev_maps}
 export DATASET_ROOT=${DATASET_ROOT:-datasets}
