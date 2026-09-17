@@ -175,7 +175,7 @@ conda create -n visionrl2-q25 python=3.10 -y && conda activate visionrl2-q25
 pip install -r requirements_qwen2_5vl.txt && pip install -e lmms-eval
 
 # Gemma-4-12B-it: transformers 5.15, torch 2.11, sdpa attention (no flash-attn, no DeepSpeed)
-conda create -n visionrl2-gemma python=3.12 -y && conda activate visionrl2-gemma
+conda create -n visionrl2-gemma python=3.11 -y && conda activate visionrl2-gemma
 pip install -r requirements_gemma4.txt && pip install -e lmms-eval
 ```
 
@@ -269,11 +269,11 @@ Only the twig is trained, so a checkpoint can also be published as a twig-only d
   year    = {2026}
 }
 
-@article{shi2026sdrpn,
-  title   = {Catching the Details: Self-Distilled RoI Predictors for Fine-Grained MLLM Perception},
-  author  = {Shi, Yuheng and Pei, Xiaohuan and Dong, Minjing and Xu, Chang},
-  journal = {arXiv preprint arXiv:2509.16944},
-  year    = {2026}
+@inproceedings{shi2026sdrpn,
+  title     = {Catching the Details: Self-Distilled RoI Predictors for Fine-Grained MLLM Perception},
+  author    = {Shi, Yuheng and Pei, Xiaohuan and Dong, Minjing and Xu, Chang},
+  booktitle = {ICLR},
+  year      = {2026}
 }
 ```
 

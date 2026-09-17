@@ -1,5 +1,5 @@
 # Environment used for the Gemma-4-12B-it experiments (encoder-free backbone).
-# Python 3.12, CUDA 12.8.
+# Python 3.11, CUDA 12.8 (versions read from the environment the Gemma numbers were produced with).
 #
 # Notes that differ from the Qwen environments:
 #   * attention backend is sdpa - no flash-attn wheel is built for this stack,
@@ -12,17 +12,17 @@ torch==2.11.0
 torchvision==0.26.0
 transformers==5.15.0
 accelerate==1.14.0
-safetensors==0.7.0
-datasets==4.6.1
-numpy==2.2.6
-pillow==12.1.1
-scipy==1.15.3
-kornia==0.8.1
-tensorboard==2.20.0
-sentencepiece==0.2.1
-tqdm==4.67.1
+safetensors==0.8.0
+datasets==5.0.1
+numpy==2.4.6
+pillow==12.3.0
+scipy==1.17.1
+kornia==0.8.3
+tensorboard==2.21.0
+sentencepiece
+tqdm==4.70.0
 # evaluation framework (bundled fork): pip install -e lmms-eval
 pytablewriter==1.2.1
-mathruler==0.1.0
-pylatexenc==2.10
+mathruler
+pylatexenc
 loguru==0.7.3

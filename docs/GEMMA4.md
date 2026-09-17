@@ -89,8 +89,8 @@ kept = min(max(native, min(9 * native, T)), C)        # floor 64
   `masked_scatter` of image features stays exact and positions keep their true 2-D ids.
   The crop tier is the smallest tier `>= kept * k^2`, capped at 1120.
 
-Source tokens are never re-encoded; pass 2 prefixes the pass-1 source tokens. If no box
-fires, the model falls back to the baseline single-pass behaviour.
+Pass 2 is a full prefill of [source at tier 1120, crop tokens, question] followed by greedy
+decoding; if no box fires, the answer is decoded from the pass-1 cache (baseline behaviour).
 
 `timing_mode=baseline` is the base-model arm (single pass, twig disabled), so any Gemma-4
 checkpoint can produce the base row.
