@@ -19,12 +19,22 @@ block training/eval with locally prepared data + checkpoints.
       - the MIX-corpus builder (v1/v2 tagging of the response corpus) is not in the tree.
 - [ ] Write `docs/DATA.md` (corpus format, image roots, how the 7k pool was selected:
       top-50% per-sample reward-std within each split, 5k infographics + 1k textvqa + 1k docvqa).
+- [ ] Gemma-4-12B data: upload the v4mix stage-1 input corpora (`input_v1.jsonl` gqa+textvqa,
+      `input_v2.jsonl` docvqa+infographicsvqa) and the generated response corpus
+      `gemma12b_it_560_v4mix_train.jsonl` (49,498 rows), plus the Gemma RL pool
+      `filtered_v2_evmaps_gemma.jsonl` + `ev_maps_cache/` and make
+      `data_prep/build_pool_gemma4.sh` / `scripts/train_sdrpn_gemma4.sh` defaults point at them.
 
 ## 2. Checkpoint release (HF)
 - [ ] SD-RPN (Phase-A) checkpoints: `qwen3_5-4b ... v4mix-jun2`, `qwen3_5-9b ... v4mix-jun4`,
       `qwen2_5vl-7b-roi-K18T3-stage1`.
 - [ ] RL checkpoints: `q35vl-4b-v4pa-placebo125-s42-full`, `q9b-placebo100-s42-full`,
       `q25vl-7b-fin-placebo100-s42`.
+- [ ] Gemma-4-12B checkpoints: SD-RPN `gemma4-12b-roi-K27T3-stage1-v4mix(-full)` and RL
+      `gemma4-12b-v4mix-rl-k1p0`. Stage 1 already writes a twig-only delta
+      (`twig_delta_final.pt`, ~1.4 GB) reassembled by
+      `qwen_src/gemma4_unified/assemble_full_checkpoint.py` - publish the delta, not the
+      24 GB full directory.
 - [ ] Decide whether to publish twig-only deltas (`tools/compress_twig.py` format, ~0.6-1.4 GB)
       plus a loader, or full checkpoints.
 - [ ] Fill the checkpoint table in README with the HF ids.
@@ -36,7 +46,8 @@ block training/eval with locally prepared data + checkpoints.
 ## 4. Paper text
 - [ ] `x_supp.tex` (hyper-parameters): control-margin scale is kappa=1.25 for Qwen3.5-4B and
       kappa=1.0 for BOTH Qwen3.5-9B and Qwen2.5-VL-7B (the shipped 7B checkpoint is the
-      kappa=1.0 run, which also won the 7B kappa sweep).
+      kappa=1.0 run, which also won the 7B kappa sweep). Gemma-4-12B also uses kappa=1.0.
+- [ ] Fill the arXiv id / link in `README.md`, `project_page/index.html` and the BibTeX blocks.
 
 ## 5. Verification log (to keep updated)
 - [x] 2026-09-02 RL smoke run (Qwen3.5-4B, 64 samples, 4 steps, seed 42, 2 GPUs): release
@@ -61,6 +72,10 @@ block training/eval with locally prepared data + checkpoints.
       in the trainer): 4-step smoke identical to the research trainer.
 - [ ] Main-protocol generation end-to-end through `scripts/main_eval.sh` from the release tree.
 - [ ] Stage-1 (`train_sdrpn_online.sh`) smoke run from the release tree.
+- [ ] Gemma-4 release scripts (`train_sdrpn_gemma4.sh`, `build_pool_gemma4.sh`,
+      `aligned_eval_gemma4.sh`, `main_eval_gemma4.sh`) are rewrites of the verified research
+      drivers with CODE_ROOT-relative paths and env knobs; only `bash -n` / `py_compile` have
+      been run on them so far - smoke each one on a GPU box before the public release.
 
 ## Project page (project_page/)
 - [ ] Fill authors / affiliations / arXiv / BibTeX before release (`TODO(release)` in index.html)
