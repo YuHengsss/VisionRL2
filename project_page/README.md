@@ -1,7 +1,11 @@
 # Project page
 
-Static, single-page site (Bulma + inline CSS/JS, bilingual EN/中文). Served by GitHub Pages
-from this folder once the repository is public (Settings → Pages → source: `main` / `project_page`).
+Static, single-page site (Bulma + inline CSS/JS, bilingual EN/中文).
+
+**Live at <https://yuhengsss.github.io/VisionRL2/>.** This repository is private, so the page is
+deployed by copying `index.html` and `assets/` (not `tools/` or this README) into `VisionRL2/` of
+the public `YuHengsss/YuHengsss.github.io` repository; its Jekyll build copies them verbatim
+(no front matter). Re-deploy after editing the page by repeating that copy and pushing.
 
 ```
 index.html            page
