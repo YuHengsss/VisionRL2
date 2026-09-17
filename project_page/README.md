@@ -31,19 +31,24 @@ initialization of Qwen3.5-4B as the policy and the frozen model as the reader.
    # (b) full dump for the chosen pool indices (+ the RL checkpoint's map on the same samples)
    python project_page/tools/export_rl_step.py --pool ... --ckpt-pa <sd-rpn-4b ckpt> \
        --ckpt-rl <vision-rl2-4b ckpt> --dataset-root ... --ev-maps-root ... \
-       --out /tmp/rl_dump --indices 1279,33,5028,5027,1254
+       --out /tmp/rl_dump --indices 1254,5028
    ```
 
 2. Package into the page:
 
    ```bash
    python project_page/tools/build_cases.py --dump /tmp/rl_dump \
-       --case "1279:Street sign (TextVQA):街头路牌（TextVQA）" ...
+       --case "1254:Door poster (TextVQA):门上海报（TextVQA）" \
+       --case "5028:Meeting minutes (DocVQA):会议纪要（DocVQA）"
    ```
+
+The page ships these two cases, indexed in the order they are passed here, so
+`#live?case=0` is the door poster and `#live?case=1` the meeting minutes.
 
 Deep link to a stage for QA: `index.html#live?case=<i>&step=<0..6>`.
 
 ## Before the page goes public
 
-- Fill in authors, affiliations, arXiv link, and BibTeX in `index.html` (search for `TODO(release)`).
+- Authors, affiliations and the BibTeX author list are filled in; the arXiv link is still a
+  placeholder (`href="#"` on the arXiv button).
 - Replace the "coming soon" checkpoint cells with the Hugging Face links.
