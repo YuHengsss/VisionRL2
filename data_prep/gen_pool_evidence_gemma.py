@@ -10,7 +10,7 @@ response->image single-region maps of the frozen base = the additive
 
 Usage (one process per GPU):
   CUDA_VISIBLE_DEVICES=0 python data_prep/gen_pool_evidence_gemma.py \
-      --pool data/rl_pools/filtered_v2.jsonl --image-root datasets \
+      --pool data/rl_pools/gemma4_12b/pool/pool.jsonl --image-root datasets \
       --out output/gemma_rl/pool_evidence_gemma_shard0.jsonl --shard-idx 0 --num-shards 2
 """
 from __future__ import annotations

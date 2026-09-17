@@ -1,17 +1,23 @@
-"""Build v2 training pool from existing stats_shard*.jsonl.
+"""Compose the final RL pool from the pre-filter's per-sample stats.
 
-V2 composition (per user request):
-  - 5000 infographicsvqa  (top by reward_std; pad up from V1's 1077)
-  - 1000 textvqa          (RANDOM sample from top 50% by reward_std)
-  - 1000 docvqa           (RANDOM sample from top 50% by reward_std)
+Reads ``stats_shard*.jsonl`` written by ``data_prep/pre_rl_filter.py --mode score``
+and picks the paper's 7,000-row mix, ranking each source by per-sample reward
+standard deviation (rows where the choice of region actually moves the reward):
 
-Rationale: doc/textvqa pools are large (~9.6k each) and the very-highest
-reward_std samples are "easy" (single fg component dominates). Sampling
-from the top half gives variety while excluding the noisiest half.
+  * 5,000 InfographicVQA — the top 5,000 by reward_std
+  * 1,000 TextVQA        — 1,000 sampled from the top 50% by reward_std
+  * 1,000 DocVQA         — 1,000 sampled from the top 50% by reward_std
 
-All needed fields (p_ref_path, K, branch, reward_mean, …) are already
-in stats_shard*.jsonl from the V1 pre-RL filter run, so no GPU re-run
-needed.
+The doc/text sources are large (~9.6k candidates each) and their very highest
+reward_std rows are "easy" (one foreground component dominates), so sampling
+from the top half keeps variety while excluding the noisiest half.
+
+No GPU is needed: every field the pool row carries is already in the stats
+shards.
+
+Usage::
+
+    python data_prep/compose_pool.py --stats-dir <pool dir> [--out-name pool.jsonl]
 """
 from __future__ import annotations
 
@@ -20,12 +26,9 @@ import random
 from collections import Counter, defaultdict
 from pathlib import Path
 
-STATS_DIR = Path(
-    "/home/yuheng/code/Qwen2.5-VL/output/region_level_grpo/"
-    "qwen3_5-4b-roi-K21T3-stage1-online-stripped-prompt"
-)
-OUT_PATH = STATS_DIR / "filtered_v2.jsonl"
-SUMMARY_PATH = STATS_DIR / "filter_summary_v2.json"
+STATS_DIR: Path = Path(".")
+OUT_PATH: Path = Path(".")
+SUMMARY_PATH: Path = Path(".")
 
 # Per-dataset selection spec.
 #   mode='top_n' → take the top N by reward_std (pure top).
@@ -40,7 +43,7 @@ SPECS = {
                "top_frac": 0.5, "seed": 0},
 }
 
-# Fields to copy into filtered.jsonl (same schema as V1).
+# Fields to copy into the pool jsonl.
 KEEP_FIELDS = [
     "K", "K_topR", "branch", "dataset", "feat_hw", "gold_answer",
     "image", "n_actions", "p_ref_path", "question",
@@ -49,18 +52,19 @@ KEEP_FIELDS = [
 
 
 def main():
-    # Allow targeting a different stats dir (e.g. the q25-7B-own pool) without
-    # editing the module constants. Defaults preserve the original 4B behaviour.
     global STATS_DIR, OUT_PATH, SUMMARY_PATH
     import argparse
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--stats-dir", default=str(STATS_DIR))
-    ap.add_argument("--out-name", default="filtered_v2.jsonl")
+    ap = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--stats-dir", required=True,
+                    help="directory holding stats_shard*.jsonl "
+                         "(pre_rl_filter's --output-base/--run-name)")
+    ap.add_argument("--out-name", default="pool.jsonl",
+                    help="pool jsonl file name, written inside --stats-dir")
     a = ap.parse_args()
     STATS_DIR = Path(a.stats_dir)
     OUT_PATH = STATS_DIR / a.out_name
-    SUMMARY_PATH = STATS_DIR / (
-        Path(a.out_name).stem.replace("filtered", "filter_summary") + ".json")
+    SUMMARY_PATH = STATS_DIR / (Path(a.out_name).stem + "_summary.json")
 
     # 1. Read all stats shards.
     rows = []
@@ -71,10 +75,10 @@ def main():
                 if not line:
                     continue
                 rows.append(json.loads(line))
-    print(f"[v2] loaded {len(rows)} stats rows from {STATS_DIR.name}")
+    print(f"[compose] loaded {len(rows)} stats rows from {STATS_DIR.name}")
 
     src_counts = Counter(r.get("dataset") for r in rows)
-    print(f"[v2] source dataset counts: {dict(src_counts)}")
+    print(f"[compose] source dataset counts: {dict(src_counts)}")
 
     # 2. Group by dataset, skip K=0 (no components — useless for RL).
     by_ds = defaultdict(list)
@@ -84,7 +88,7 @@ def main():
             n_k0_drop += 1
             continue
         by_ds[r["dataset"]].append(r)
-    print(f"[v2] dropped {n_k0_drop} K=0 rows")
+    print(f"[compose] dropped {n_k0_drop} K=0 rows")
 
     # 3. Per-dataset selection per SPECS.
     selected = []
@@ -92,7 +96,7 @@ def main():
     for ds, spec in SPECS.items():
         bucket = by_ds.get(ds, [])
         if not bucket:
-            print(f"[v2] !! dataset {ds} not in stats")
+            print(f"[compose] !! dataset {ds} not in stats")
             continue
         bucket_sorted = sorted(
             bucket,
@@ -127,7 +131,7 @@ def main():
                    f"{max(float(r.get('reward_std', 0.0)) for r in chosen):.4f}]")
         else:
             raise ValueError(f"unknown mode {mode}")
-        print(f"[v2] {ds}: {msg}")
+        print(f"[compose] {ds}: {msg}")
         selected.extend(chosen)
         k_dist = Counter(int(r.get("K", 0)) for r in chosen)
         per_ds_summary[ds] = {
@@ -139,8 +143,8 @@ def main():
             "reward_std_max": max(float(r.get("reward_std", 0)) for r in chosen),
         }
 
-    # 4. Write filtered_v2.jsonl with the V1 schema.
-    print(f"[v2] writing {len(selected)} rows -> {OUT_PATH}")
+    # 4. Write the pool jsonl.
+    print(f"[compose] writing {len(selected)} rows -> {OUT_PATH}")
     with open(OUT_PATH, "w", encoding="utf-8") as f:
         for r in selected:
             slim = {k: r[k] for k in KEEP_FIELDS if k in r}
@@ -149,7 +153,6 @@ def main():
     # 5. Write summary.
     overall_k = Counter(int(r.get("K", 0)) for r in selected)
     summary = {
-        "version": "v2",
         "source_stats_dir": str(STATS_DIR),
         "specs": SPECS,
         "per_dataset": per_ds_summary,
@@ -158,7 +161,7 @@ def main():
     }
     with open(SUMMARY_PATH, "w", encoding="utf-8") as f:
         json.dump(summary, f, indent=2)
-    print(f"[v2] summary -> {SUMMARY_PATH}")
+    print(f"[compose] summary -> {SUMMARY_PATH}")
     print(json.dumps(summary, indent=2))
 
 

@@ -14,10 +14,10 @@ Policy-independent (frozen base + image + cached response) -> cached once.
 
 Usage (one process per GPU):
   CUDA_VISIBLE_DEVICES=0 python data_prep/build_evidence_map_cache_gemma.py \
-      --pool data/rl_pools/filtered_v2.jsonl --image-root datasets \
+      --pool data/rl_pools/gemma4_12b/pool/pool.jsonl --image-root datasets \
       --responses output/gemma_rl/pool_evidence_gemma.jsonl \
       --cache-dir output/gemma_rl/ev_maps_cache_gemma \
-      --out-pool output/gemma_rl/filtered_v2_evmaps_gemma.jsonl --shard-id 0 --shard-count 2
+      --out-pool data/rl_pools/gemma4_12b/rl_pool.jsonl --shard-id 0 --shard-count 2
 """
 from __future__ import annotations
 

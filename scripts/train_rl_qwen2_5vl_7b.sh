@@ -3,7 +3,8 @@
 # Uses the released SD-RPN checkpoint qwen2_5vl-7b-roi-K18T3-stage1 as init and the
 # transformers-4.51 environment (requirements_qwen2_5vl.txt).
 export PHASE_A_CKPT=${PHASE_A_CKPT:-output/sdrpn/qwen2_5vl-7b-roi-K18T3-stage1}
-export FILTERED_JSONL=${FILTERED_JSONL:-data/rl_pools/filtered_v2_evmaps_q25_7b.jsonl}
+export FILTERED_JSONL=${FILTERED_JSONL:-data/VisionRL2-data/rl_pools/rl_pool_qwen2_5_vl_7b.jsonl}
+export EV_MAPS_ROOT=${EV_MAPS_ROOT:-data/ev_maps}
 export DATASET_ROOT=${DATASET_ROOT:-datasets}
 export GPU_IDS=${GPU_IDS:-0,1}
 export RUN_NAME=${RUN_NAME:-qwen2_5vl-7b-rl}

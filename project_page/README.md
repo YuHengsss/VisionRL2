@@ -25,7 +25,7 @@ initialization of Qwen3.5-4B as the policy and the frozen model as the reader.
    ```bash
    export PYTHONPATH=$PWD:$PWD/qwen-vl-finetune:$PWD/lmms-eval
    # (a) scan candidates -> <out>/candidates.jsonl (K, contributions, decisions, supp)
-   python project_page/tools/export_rl_step.py --pool data/rl_pools/filtered_v2_evmaps_4b.jsonl \
+   python project_page/tools/export_rl_step.py --pool data/VisionRL2-data/rl_pools/rl_pool_qwen3_5_4b.jsonl \
        --ckpt-pa <sd-rpn-4b ckpt> --dataset-root <datasets> --ev-maps-root <ev cache root> \
        --out /tmp/rl_scan --scan 200
    # (b) full dump for the chosen pool indices (+ the RL checkpoint's map on the same samples)

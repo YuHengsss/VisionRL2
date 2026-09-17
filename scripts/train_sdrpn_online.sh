@@ -18,9 +18,11 @@
 #   MODEL=qwen3_5-4b bash scripts/train_sdrpn_online.sh
 #   MODEL=qwen3_5-9b GPU_IDS=0,1,2,3 bash scripts/train_sdrpn_online.sh
 #
-# Required inputs (see docs/DATA.md):
+# Required inputs (see the "Data" section of README.md):
 #   ROI_DATA_PATH   jsonl corpus with fields {dataset, image, question, response}
-#                   (the model's own responses on the VisualCoT training split)
+#                   (the model's own responses on the VisualCoT training split).
+#                   Released as sdrpn_corpora/qwen3_5_{4b,9b}_response_corpus.jsonl,
+#                   or regenerate it with data_prep/build_corpus_qwen3_5.sh.
 #   DATASET_ROOT    image roots for the per-dataset image folders
 # =============================================================================
 set -euo pipefail
@@ -35,13 +37,13 @@ case "${MODEL}" in
     LLM=${LLM:-Qwen/Qwen3.5-4B}
     FAMILY=${ONLINE_PSEUDO_LABEL_FAMILY:-qwen3_5_4b}
     BATCH_SIZE=${BATCH_SIZE:-8};  GRAD_ACCUM_STEPS=${GRAD_ACCUM_STEPS:-4}
-    ROI_DATA_PATH=${ROI_DATA_PATH:-data/sdrpn/qwen35_4b_vcot50k_MIX.jsonl}
+    ROI_DATA_PATH=${ROI_DATA_PATH:-data/VisionRL2-data/sdrpn_corpora/qwen3_5_4b_response_corpus.jsonl}
     ;;
   qwen3_5-9b)
     LLM=${LLM:-Qwen/Qwen3.5-9B}
     FAMILY=${ONLINE_PSEUDO_LABEL_FAMILY:-qwen3_5_9b}
     BATCH_SIZE=${BATCH_SIZE:-4};  GRAD_ACCUM_STEPS=${GRAD_ACCUM_STEPS:-8}
-    ROI_DATA_PATH=${ROI_DATA_PATH:-data/sdrpn/qwen35_9b_vcot50k_MIX.jsonl}
+    ROI_DATA_PATH=${ROI_DATA_PATH:-data/VisionRL2-data/sdrpn_corpora/qwen3_5_9b_response_corpus.jsonl}
     ;;
   *) echo "MODEL must be qwen3_5-4b or qwen3_5-9b (got '${MODEL}')"; exit 1 ;;
 esac
