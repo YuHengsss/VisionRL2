@@ -149,6 +149,10 @@ class QwenHeatmapRunner:
         else:
             labels[0, -n_ans:] = input_ids[0, -n_ans:]
         enc["labels"] = labels
+        # The Qwen forks only enter the per-sample capture loop when a
+        # roi_target_map is supplied (its values are never read on the
+        # return_per_head_score path); the RL collator attaches the same dummy.
+        enc["roi_target_map"] = [torch.zeros(1, dtype=torch.float32)]
 
         out = self.model(**enc, use_cache=False)
         phs = getattr(out, "per_head_scores", None)
