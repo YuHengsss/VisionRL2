@@ -18,7 +18,7 @@ Yuheng Shi<sup>1</sup>, Xiaohuan Pei<sup>1</sup>, Minjing Dong<sup>2</sup>, Chan
 
 - **Sep. 2026** &mdash; Training data released: SD-RPN corpora, the 7k RL pools and the
   evidence-map caches for all four backbones
-  ([`iwantmorepaper/VisionRL2-data`](https://huggingface.co/datasets/iwantmorepaper/VisionRL2-data)),
+  ([`YuhengSSS/VisionRL2-data`](https://huggingface.co/datasets/YuhengSSS/VisionRL2-data)),
   plus `data_prep/` drivers that regenerate every one of them.
 - **Sep. 2026** &mdash; Gemma-4-12B-it (encoder-free backbone) support: SD-RPN twig, region-level RL, sparse RoI evaluation ([docs/GEMMA4.md](docs/GEMMA4.md)).
 - **Sep. 2026** &mdash; Code release: SD-RPN online pseudo-label training, the region-level RL stage for four backbones, both evaluation protocols, and the project page.
@@ -27,7 +27,7 @@ Yuheng Shi<sup>1</sup>, Xiaohuan Pei<sup>1</sup>, Minjing Dong<sup>2</sup>, Chan
 
 - [ ] Release the SD-RPN and Vision-RL² checkpoints on Hugging Face (see the table below).
 - [x] Release the RL pools and evidence-map caches, plus the SD-RPN training corpora
-      ([`iwantmorepaper/VisionRL2-data`](https://huggingface.co/datasets/iwantmorepaper/VisionRL2-data)).
+      ([`YuhengSSS/VisionRL2-data`](https://huggingface.co/datasets/YuhengSSS/VisionRL2-data)).
 - [ ] Gradio RoI visualizer ported to the release code paths.
 
 ## Introduction
@@ -161,9 +161,9 @@ pip install -r requirements_gemma4.txt && pip install -e lmms-eval
 ## Data
 
 Everything the two stages read is released on Hugging Face:
-[`iwantmorepaper/VisionRL2-data`](https://huggingface.co/datasets/iwantmorepaper/VisionRL2-data)
+[`YuhengSSS/VisionRL2-data`](https://huggingface.co/datasets/YuhengSSS/VisionRL2-data)
 (jsonls + evidence-map caches) and
-[`YuHengsss/RoITraining`](https://huggingface.co/datasets/YuHengsss/RoITraining) (images).
+[`YuhengSSS/RoITraining`](https://huggingface.co/datasets/YuhengSSS/RoITraining) (images).
 Every file can also be rebuilt from scratch with the `data_prep/` drivers; the pipeline below
 gives both paths, released file first.
 
@@ -171,12 +171,12 @@ gives both paths, released file first.
 
 ```bash
 # training data: SD-RPN corpora, RL pools, evidence-map caches (~300 MB)
-hf download iwantmorepaper/VisionRL2-data --repo-type dataset --local-dir data/VisionRL2-data
+hf download YuhengSSS/VisionRL2-data --repo-type dataset --local-dir data/VisionRL2-data
 mkdir -p data/ev_maps
 for t in data/VisionRL2-data/ev_maps/*.tar; do tar -xf "$t" -C data/ev_maps; done
 
 # images (VisualCoT sources)
-hf download YuHengsss/RoITraining --repo-type dataset --local-dir data/RoITraining
+hf download YuhengSSS/RoITraining --repo-type dataset --local-dir data/RoITraining
 mkdir -p datasets
 for t in data/RoITraining/*.tar; do tar -xf "$t" -C datasets; done
 ```
