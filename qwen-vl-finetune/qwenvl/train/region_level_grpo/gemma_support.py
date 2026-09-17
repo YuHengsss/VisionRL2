@@ -12,7 +12,7 @@ here so the trainer / reward model / collator only need a small dispatch:
   image tokens from the last prompt token, per head, exactly like the policy
   capture (``modeling_gemma4_unified_batch._roi_per_head_scores``).
 * :class:`GemmaHeatmapRunner` — ``infer(image, question, heatmap_only=True)``
-  returning ``prob_map`` / ``pred_map`` / ``feat_hw`` (the ``QZoomInference``
+  returning ``prob_map`` / ``pred_map`` / ``feat_hw`` (the heatmap-runner
   subset the pool filter uses).
 
 Conventions (match the Gemma inference heatmap in ``roi_inference``):
@@ -205,7 +205,7 @@ class _HeatmapResult:
 
 
 class GemmaHeatmapRunner:
-    """Minimal ``QZoomInference``-like runner for the pool filter.
+    """Minimal ``QwenHeatmapRunner``-like runner for the pool filter.
 
     ``infer(image, question, heatmap_only=True)`` runs the SD-RPN twig on the
     stripped prompt (question only, chat template, thinking disabled) and

@@ -592,14 +592,14 @@ def evaluate(
                     }
                     example.update(metrics)
                     # Merge model-side per-sample metrics (visual_token_num,
-                    # latency, high-res score) recorded by the qzoom chat
+                    # latency, high-res score) recorded by the VisionRL2 chat
                     # models into the harness sample record. Runs per-rank
                     # BEFORE the rank-0 gather, so every shard's metadata
                     # lands in the samples jsonl.
                     try:
                         _md = getattr(lm, "high_res_pred_dict", None)
                         if isinstance(_md, dict) and doc_id in _md:
-                            example["qzoom_sample_metrics"] = _md[doc_id]
+                            example["visionrl2_sample_metrics"] = _md[doc_id]
                     except Exception:
                         pass
                     task_output.logged_samples.append(example)
@@ -707,7 +707,7 @@ def evaluate(
         try:
             _mdict = getattr(lm, "high_res_pred_dict", {}).get("metric_dict")
             if _mdict:
-                results_dict["qzoom_model_metrics"] = _mdict
+                results_dict["visionrl2_model_metrics"] = _mdict
         except Exception:
             pass
     else:

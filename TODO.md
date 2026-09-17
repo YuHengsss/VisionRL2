@@ -20,8 +20,8 @@ Published as [`YuhengSSS/VisionRL2-data`](https://huggingface.co/datasets/Yuheng
       dataset card and in `data_prep/README.md`.
 - [x] `data_prep/` regenerates every released file:
       - `qwen_heatmap.py` (in `region_level_grpo/`) replaces the external
-        `qzoom_demo.qzoom_wrapper` dependency; `pre_rl_filter.py` dispatches on
-        `--model-family` and keeps the wrapper only as an opt-in `--heatmap-runner`.
+        external demo-wrapper dependency; `pre_rl_filter.py` dispatches on
+        `--model-family` alone (the external wrapper hook is gone).
       - `build_corpus_qwen3_5.sh` + `split_candidates.py` are the missing MIX/merge step
         (two prompt styles, `version` tag, empty-response drop).
       - `build_pool_qwen3_5.sh` / `build_pool_qwen2_5_vl.sh` replace `run_cache_4b.sh`,
@@ -57,7 +57,7 @@ Open follow-ups:
 - [ ] Fill the checkpoint table in README with the HF ids.
 
 ## 3. Demo
-- [ ] Gradio RoI visualizer (`qzoom_demo/launch_compare.sh` in the research tree) — port to the
+- [ ] Gradio RoI visualizer (`launch_compare.sh` in the research tree) — port to the
       release code paths and add as `demo/`.
 
 ## 4. Paper text

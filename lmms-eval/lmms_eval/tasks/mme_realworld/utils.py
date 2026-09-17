@@ -251,20 +251,20 @@ def mme_realworld_second_half(dataset):
 
 
 def mme_realworld_slice(dataset):
-    """Env-driven doc slicing (QZOOM_DOC_RANGE='a:b') for multi-process
+    """Env-driven doc slicing (VISIONRL2_DOC_RANGE='a:b') for multi-process
     single-GPU sharding on walltime-bounded nodes; scoring happens offline.
-    QZOOM_DOC_IDS_FILE (json list of global indices) takes precedence and
+    VISIONRL2_DOC_IDS_FILE (json list of global indices) takes precedence and
     selects an explicit doc subset (e.g. limit-exceeding samples to redo)."""
     import os, json
-    f = os.environ.get("QZOOM_DOC_IDS_FILE", "")
+    f = os.environ.get("VISIONRL2_DOC_IDS_FILE", "")
     if f:
         ids = sorted(i for i in json.load(open(f)) if i < len(dataset))
         return dataset.select(ids)
-    st = os.environ.get("QZOOM_DOC_STRIDE", "")
+    st = os.environ.get("VISIONRL2_DOC_STRIDE", "")
     if st:
         k, m = st.split(":")
         return dataset.select(range(int(k), len(dataset), int(m)))
-    r = os.environ.get("QZOOM_DOC_RANGE", "")
+    r = os.environ.get("VISIONRL2_DOC_RANGE", "")
     if not r:
         return dataset
     a, b = r.split(":")

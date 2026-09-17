@@ -53,7 +53,7 @@ done
 
 Results are in `logs/aligned_eval/<ckpt>_cap<CAP>/*/*results.json`; the measured visual tokens
 per sample (source + crop) used for the x-axis of Fig. 5 are logged per sample in the
-`*samples*.jsonl` files (`qzoom_sample_metrics`).
+`*samples*.jsonl` files (`visionrl2_sample_metrics`).
 
 Qwen2.5-VL-7B uses 28×28-pixel tokens (limit = cap × 784 pixels), Qwen3.5 uses 32×32
 (cap × 1024); both scripts handle this through `MODEL=`.

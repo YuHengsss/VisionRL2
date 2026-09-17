@@ -181,8 +181,7 @@ def extract_box(grid_logits: torch.Tensor, recipe: str, conf: float,
     """Heatmap → grid box (r0, c0, r1, c1) inclusive, or None (skip stage 2).
 
     Faithful port of the qwen two-stage box extraction (recon 2026-08-14,
-    qzoom-revision mm_utils.get_batched_sub_images_v2 / qwen_src/roi/
-    crop_budget.py): RAW q·k logit map → sigmoid (exactly once) → sink
+    mm_utils.get_batched_sub_images_v2 / qwen_src/roi/crop_budget.py): RAW q·k logit map → sigmoid (exactly once) → sink
     suppression → gaussian blur(kernel=3, σ=1.0) → threshold → bbox of the
     UNION of above-threshold cells (no connected components), empty mask ⇒
     no augmentation. One crop per sample.

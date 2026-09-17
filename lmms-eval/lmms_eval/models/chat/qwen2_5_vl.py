@@ -1,9 +1,9 @@
 # --- Q-Zoom centralized env-knob accessor (Phase A) ---
 try:
-    from qwen_src.qzoom_config import getenv as qz_getenv
+    from qwen_src.visionrl2_config import getenv as qz_getenv
 except ImportError:  # pragma: no cover - lmms-eval must not hard-depend on qwen_src
     try:
-        from qzoom_config import getenv as qz_getenv
+        from visionrl2_config import getenv as qz_getenv
     except ImportError:
         import os
         qz_getenv = os.environ.get
@@ -50,7 +50,7 @@ class Qwen2_5_VL(Qwen2_5_VLSimple):
         e2e_latency = 0
         total_tokens = 0
 
-        # ---- CPU-stage prefetch (QZOOM_EVAL_PREFETCH=N worker threads) ----
+        # ---- CPU-stage prefetch (VISIONRL2_EVAL_PREFETCH=N worker threads) ----
         # Port of the qwen3_5 chat-class pipeline: doc-access -> jpg-decode
         # -> chat-template -> smart-resize is per-chunk pure CPU, so it can
         # run N chunks ahead of the bs=1 GPU generate loop.
@@ -103,7 +103,7 @@ class Qwen2_5_VL(Qwen2_5_VLSimple):
         import os as _os_pf
         from collections import deque as _pf_deque
         from concurrent.futures import ThreadPoolExecutor as _PFExecutor
-        _pf_workers = int(_os_pf.environ.get("QZOOM_EVAL_PREFETCH", "4") or 0)
+        _pf_workers = int(_os_pf.environ.get("VISIONRL2_EVAL_PREFETCH", "4") or 0)
         if _pf_workers > 0:
             def _prepared_stream():
                 # Bounded lookahead: at most workers+2 prepared chunks in

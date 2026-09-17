@@ -24,9 +24,9 @@ from __future__ import annotations
 
 # --- Q-Zoom centralized env-knob accessor (Phase A) ---
 try:
-    from qwen_src.qzoom_config import getenv as qz_getenv
+    from qwen_src.visionrl2_config import getenv as qz_getenv
 except ImportError:  # pragma: no cover
-    from qzoom_config import getenv as qz_getenv
+    from visionrl2_config import getenv as qz_getenv
 from typing import Optional, Sequence
 
 import torch

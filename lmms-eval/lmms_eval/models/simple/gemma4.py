@@ -24,9 +24,9 @@ from lmms_eval import utils
 from lmms_eval.api.instance import Instance
 from lmms_eval.api.model import lmms
 from lmms_eval.api.registry import register_model
-import json as _qz_json  # [qzoom] un-instrumented e2e
-import os as _qz_os  # [qzoom] un-instrumented e2e
-import time as _qz_time  # [qzoom] un-instrumented e2e
+import json as _qz_json  # [visionrl2] un-instrumented e2e
+import os as _qz_os  # [visionrl2] un-instrumented e2e
+import time as _qz_time  # [visionrl2] un-instrumented e2e
 
 # Chat-marker / thought-channel artifacts that can leak into decoded text if
 # the tokenizer does not treat them as special tokens.
@@ -279,7 +279,7 @@ class Gemma4(lmms):
         # in threads overlaps it with the GPU, which otherwise idles through
         # multi-second decodes of the big InfoVQA / HR-Bench pages.  Timing
         # is unaffected: sample_latency and the stage timers start inside
-        # answer_v2, after this stage.  QZOOM_EVAL_PREFETCH=0 restores the
+        # answer_v2, after this stage.  VISIONRL2_EVAL_PREFETCH=0 restores the
         # serial path; the produced inputs are identical either way.
         # Timing runs cap oversized sources here, in the prefetch stage,
         # so the cost never lands inside a timer.  Ported from the q3.5
@@ -321,7 +321,7 @@ class Gemma4(lmms):
                 pil_lists.append(pil)
             return contexts, all_gen_kwargs, doc_id, task, split, pil_lists
 
-        _pf_workers = int(_qz_os.environ.get("QZOOM_EVAL_PREFETCH", "4") or 0)
+        _pf_workers = int(_qz_os.environ.get("VISIONRL2_EVAL_PREFETCH", "4") or 0)
         if _pf_workers > 0:
             from collections import deque as _pf_deque
             from concurrent.futures import ThreadPoolExecutor as _PFExecutor
@@ -377,7 +377,7 @@ class Gemma4(lmms):
                     mnt = {**{"max_new_tokens": self.default_max_new_tokens},
                            **gen_kwargs}.get("max_new_tokens",
                                              self.default_max_new_tokens)
-                    _qz_t0 = _qz_time.time()          # [qzoom] un-instrumented e2e
+                    _qz_t0 = _qz_time.time()          # [visionrl2] un-instrumented e2e
                     with torch.inference_mode():
                         ans = self.roi_pipeline.answer_v2(
                             pil_images[0], context,

@@ -55,7 +55,7 @@ import sys
 import time
 from collections import Counter, defaultdict
 from pathlib import Path
-from typing import Dict, Iterable, List, Optional, Tuple
+from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 import numpy as np
 import torch
@@ -69,10 +69,6 @@ for p in (_REPO_ROOT, _REPO_ROOT / "qwen-vl-finetune"):
     if str(p) not in sys.path:
         sys.path.insert(0, str(p))
 
-try:  # Optional external demo wrapper; the in-repo runners are the default.
-    from qzoom_demo.qzoom_wrapper import QZoomInference  # noqa: E402
-except ImportError:  # pragma: no cover
-    QZoomInference = None  # type: ignore[assignment]
 from qwenvl.train.region_level_grpo.actions import (  # noqa: E402
     enumerate_removal_actions,
 )
@@ -238,7 +234,7 @@ def extract_question_and_answer(rec: dict) -> Tuple[Optional[str], Optional[str]
 def score_one_sample(
     rec: dict,
     sample_id: int,
-    runner: QZoomInference,
+    runner: Any,
     reward_model: RewardModel,
     p_ref_dir: Path,
     *,
@@ -550,10 +546,6 @@ def main() -> None:
     ap.add_argument("--reward-size-beta", type=float, default=1.0)
     ap.add_argument("--reward-size-gamma", type=float, default=0.6)
 
-    ap.add_argument("--heatmap-runner", choices=["in_repo", "qzoom_demo"],
-                    default="in_repo",
-                    help="Qwen heatmap backend: the in-repo QwenHeatmapRunner "
-                         "(default) or the optional external demo wrapper.")
     ap.add_argument("--attn-impl", default="flash_attention_2",
                     help="attention implementation for the Qwen heatmap runner")
 
@@ -645,23 +637,6 @@ def main() -> None:
             pretrained=args.model_path,
             max_soft_tokens=args.max_soft_tokens,
             attn_implementation="sdpa",
-        )
-    elif str(args.heatmap_runner) == "qzoom_demo":
-        # Optional fallback: the external demo wrapper, when it is importable.
-        if QZoomInference is None:
-            raise ImportError("qzoom_demo.qzoom_wrapper.QZoomInference not importable; "
-                              "use --heatmap-runner in_repo (the default)")
-        runner = QZoomInference(
-            pretrained=args.model_path,
-            model_family=args.model_family,
-            attn_implementation=args.attn_impl,
-            min_pixels=args.min_pixels,
-            max_pixels=args.max_pixels,
-            roi_conf_thresh=0.0,
-            high_res_thresh=0.10,
-            dynamic_conf_mode="peak_ratio",
-            dynamic_ratio_thresh=3.0,
-            dynamic_peak_fraction=0.15,  # only matters for runner.infer's own threshold; we re-threshold after
         )
     else:
         # Qwen3.5-VL / Qwen2.5-VL: in-repo runner, same load path and scoring

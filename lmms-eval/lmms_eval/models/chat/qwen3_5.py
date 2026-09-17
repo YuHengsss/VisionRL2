@@ -2,10 +2,10 @@ import time
 
 # --- Q-Zoom centralized env-knob accessor (Phase A) ---
 try:
-    from qwen_src.qzoom_config import getenv as qz_getenv
+    from qwen_src.visionrl2_config import getenv as qz_getenv
 except ImportError:  # pragma: no cover - lmms-eval must not hard-depend on qwen_src
     try:
-        from qzoom_config import getenv as qz_getenv
+        from visionrl2_config import getenv as qz_getenv
     except ImportError:
         import os
         qz_getenv = os.environ.get
@@ -67,7 +67,7 @@ class Qwen3_5(Qwen3_5Simple):
             if hasattr(language_model, "roi_conf_thresh"):
                 language_model.roi_conf_thresh = self.roi_conf_thresh
 
-        # ---- CPU-stage prefetch (QZOOM_EVAL_PREFETCH=N worker threads) ----
+        # ---- CPU-stage prefetch (VISIONRL2_EVAL_PREFETCH=N worker threads) ----
         # The doc-access -> jpg-decode -> chat-template -> smart-resize stage
         # below is per-chunk pure CPU with no cross-chunk state; running it
         # N chunks ahead in threads overlaps it with GPU generate (the bs=1
@@ -131,9 +131,9 @@ class Qwen3_5(Qwen3_5Simple):
         from collections import deque as _pf_deque
         from concurrent.futures import ThreadPoolExecutor as _PFExecutor
         # Default ON (validated 2026-07-19: identical scores, 1.35x on ZB,
-        # more on decode-heavy benches). QZOOM_EVAL_PREFETCH=0 restores the
+        # more on decode-heavy benches). VISIONRL2_EVAL_PREFETCH=0 restores the
         # serial path.
-        _pf_workers = int(_os_pf.environ.get("QZOOM_EVAL_PREFETCH", "4") or 0)
+        _pf_workers = int(_os_pf.environ.get("VISIONRL2_EVAL_PREFETCH", "4") or 0)
         if _pf_workers > 0:
             def _prepared_stream():
                 # Bounded lookahead: at most workers+2 prepared chunks in
@@ -208,8 +208,8 @@ class Qwen3_5(Qwen3_5Simple):
             inputs.data["src_images"] = all_images
             inputs.data["processor"] = self.processor
 
-            # --- QZOOM_STAGE_TIMING: open the per-sample stage window ---
-            # Inert unless QZOOM_STAGE_TIMING=1. The in-model laps
+            # --- VISIONRL2_STAGE_TIMING: open the per-sample stage window ---
+            # Inert unless VISIONRL2_STAGE_TIMING=1. The in-model laps
             # (qwen_src/qwen3_5/modeling_qwen3_5_batch.py) partition the
             # prefill; decode is derived from the post-lm_head stamp.
             _qzt_on = qzt.enabled()
@@ -317,7 +317,7 @@ class Qwen3_5(Qwen3_5Simple):
                     "sample_latency": sample_elapsed,
                     "sample_tps": (sample_tokens / sample_elapsed) if sample_elapsed > 0 else 0.0,
                 }
-                # --- QZOOM_STAGE_TIMING: per-sample sidecar record ---
+                # --- VISIONRL2_STAGE_TIMING: per-sample sidecar record ---
                 if _qzt_stage is not None:
                     _n = getattr(self, "_qzt_sample_counter", 0)
                     self._qzt_sample_counter = _n + 1

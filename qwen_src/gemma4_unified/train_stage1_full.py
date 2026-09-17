@@ -25,7 +25,7 @@ import sys
 import time
 
 sys.path.insert(0, os.environ.get(
-    "QZOOM_REPO", os.getcwd()))
+    "VISIONRL2_REPO", os.getcwd()))
 
 import torch
 import torch.distributed as dist

@@ -166,7 +166,7 @@ class Qwen3_5(lmms):
             self._rank = 0
             self._world_size = 1
         # Per-sample records (visual_token_num, latency, ...) filled by the
-        # chat subclass; read back by the evaluator into qzoom_sample_metrics.
+        # chat subclass; read back by the evaluator into visionrl2_sample_metrics.
         self.high_res_pred_dict = {}
         self.model_name = pretrained.split("/")[-1]
 
