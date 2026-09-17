@@ -33,17 +33,17 @@ Output layout::
 CLI examples::
 
     # Stage 1 — shard 0 of 3 on GPU 1
-    CUDA_VISIBLE_DEVICES=1 python -m qwenvl.train.region_level_grpo.cli.pre_rl_filter \\
+    CUDA_VISIBLE_DEVICES=1 python data_prep/pre_rl_filter.py \\
         --mode score \\
-        --model-path output/qwen3vl-4b-roi-K24T3-stage1-online-match-resgen-e2s \\
-        --model-family qwen3_vl \\
-        --input-jsonl /home/yuheng/datasets/visual_cot_jsonl/vcot50k_source.jsonl \\
+        --model-path output/sdrpn/qwen3_5-4b-sdrpn-K21T3-online \\
+        --model-family qwen3_5 \\
+        --input-jsonl data/VisionRL2-data/rl_pools/candidates_visualcot_50k.jsonl \\
         --shard-id 0 --num-shards 3
 
     # Stage 2 — aggregate (after all 3 shards done)
-    python -m qwenvl.train.region_level_grpo.cli.pre_rl_filter \\
+    python data_prep/pre_rl_filter.py \\
         --mode aggregate \\
-        --model-path output/qwen3vl-4b-roi-K24T3-stage1-online-match-resgen-e2s
+        --model-path output/sdrpn/qwen3_5-4b-sdrpn-K21T3-online
 """
 
 from __future__ import annotations
@@ -69,7 +69,7 @@ for p in (_REPO_ROOT, _REPO_ROOT / "qwen-vl-finetune"):
     if str(p) not in sys.path:
         sys.path.insert(0, str(p))
 
-try:  # Qwen heatmap runner (research-tree demo wrapper); Gemma has its own.
+try:  # Optional external demo wrapper; the in-repo runners are the default.
     from qzoom_demo.qzoom_wrapper import QZoomInference  # noqa: E402
 except ImportError:  # pragma: no cover
     QZoomInference = None  # type: ignore[assignment]
@@ -129,17 +129,16 @@ def dump_profile() -> str:
     return "\n".join(lines)
 
 
-# --- per-source image roots, mirroring make_data/debug_step73_data.py ------
+# --- per-source image roots ------------------------------------------------
 
-import os as _os  # noqa: E402
-_DATASET_ROOT = _os.environ.get("DATASET_ROOT", "/home/yuheng/datasets")
-DS_IMAGE_ROOTS: Dict[str, str] = {
-    "textvqa": f"{_DATASET_ROOT}/textvqa/train_images",
-    "docvqa": f"{_DATASET_ROOT}/DocVQA",
-    "infographicsvqa": f"{_DATASET_ROOT}/infographicsvqa/infographicsvqa_images",
-    "gqa": f"{_DATASET_ROOT}/gqa/images",
-    "chartqa": f"{_DATASET_ROOT}/ChartQA/images",
-}
+# Single source of truth for the per-dataset image folders: the RL dataset
+# module resolves them from DATASET_ROOT (default "datasets"), so the pool
+# builder and the trainer always agree on where images live.
+from qwenvl.train.region_level_grpo.dataset import (  # noqa: E402
+    DS_IMAGE_ROOTS as _DS_IMAGE_ROOTS,
+)
+
+DS_IMAGE_ROOTS: Dict[str, str] = dict(_DS_IMAGE_ROOTS)
 
 
 # --- jsonl + sample utilities ----------------------------------------------
@@ -505,7 +504,9 @@ def main() -> None:
     ap.add_argument("--model-family", default="qwen3_5",
                     choices=["qwen2_5_vl", "qwen3_vl", "qwen3_5", "gemma4"])
     ap.add_argument("--input-jsonl", type=Path,
-                    default=Path("/home/yuheng/datasets/visual_cot_jsonl/vcot50k_source.jsonl"))
+                    default=Path("data/VisionRL2-data/rl_pools/"
+                                 "candidates_visualcot_50k.jsonl"),
+                    help="candidate QA jsonl (the released VisualCoT 50k set)")
 
     # Output dir: base / run_name. run_name auto = basename of model_path.
     ap.add_argument("--output-base", type=Path,
@@ -549,7 +550,14 @@ def main() -> None:
     ap.add_argument("--reward-size-beta", type=float, default=1.0)
     ap.add_argument("--reward-size-gamma", type=float, default=0.6)
 
-    # Pixel budget for QZoomInference.
+    ap.add_argument("--heatmap-runner", choices=["in_repo", "qzoom_demo"],
+                    default="in_repo",
+                    help="Qwen heatmap backend: the in-repo QwenHeatmapRunner "
+                         "(default) or the optional external demo wrapper.")
+    ap.add_argument("--attn-impl", default="flash_attention_2",
+                    help="attention implementation for the Qwen heatmap runner")
+
+    # Source-image pixel budget for the heatmap runner.
     ap.add_argument("--min-pixels", type=int, default=262144)
     ap.add_argument("--max-pixels", type=int, default=589824)
     ap.add_argument("--max-soft-tokens", type=int, default=560,
@@ -638,14 +646,15 @@ def main() -> None:
             max_soft_tokens=args.max_soft_tokens,
             attn_implementation="sdpa",
         )
-    else:
+    elif str(args.heatmap_runner) == "qzoom_demo":
+        # Optional fallback: the external demo wrapper, when it is importable.
         if QZoomInference is None:
-            raise ImportError("qzoom_demo.qzoom_wrapper.QZoomInference not importable "
-                              "(needed for the Qwen families)")
+            raise ImportError("qzoom_demo.qzoom_wrapper.QZoomInference not importable; "
+                              "use --heatmap-runner in_repo (the default)")
         runner = QZoomInference(
             pretrained=args.model_path,
             model_family=args.model_family,
-            attn_implementation="flash_attention_2",
+            attn_implementation=args.attn_impl,
             min_pixels=args.min_pixels,
             max_pixels=args.max_pixels,
             roi_conf_thresh=0.0,
@@ -653,6 +662,17 @@ def main() -> None:
             dynamic_conf_mode="peak_ratio",
             dynamic_ratio_thresh=3.0,
             dynamic_peak_fraction=0.15,  # only matters for runner.infer's own threshold; we re-threshold after
+        )
+    else:
+        # Qwen3.5-VL / Qwen2.5-VL: in-repo runner, same load path and scoring
+        # conventions as the RL trainer (the family is read off the config).
+        from qwenvl.train.region_level_grpo.qwen_heatmap import QwenHeatmapRunner
+        runner = QwenHeatmapRunner(
+            pretrained=args.model_path,
+            model_family=args.model_family,
+            attn_implementation=args.attn_impl,
+            min_pixels=args.min_pixels,
+            max_pixels=args.max_pixels,
         )
     reward_model = RewardModel(
         model=runner.model,

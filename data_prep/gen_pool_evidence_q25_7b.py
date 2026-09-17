@@ -45,13 +45,13 @@ VISUAL_EVIDENCE_SUFFIX = (
 )
 
 # Per-dataset image roots (resolved from the pool's basename image field).
-IMAGE_ROOTS = {
-    "docvqa": "/home/yuheng/datasets/DocVQA",
-    "textvqa": "/home/yuheng/datasets/textvqa/train_images",
-    "infographicsvqa": "/home/yuheng/datasets/infographicsvqa/infographicsvqa_images",
-    "gqa": "/home/yuheng/datasets/gqa/images",
-    "ChartQA": "/home/yuheng/datasets/ChartQA/images",
-    "dude": "/home/yuheng/datasets/dude_images",
+IMAGE_ROOTS = {}   # filled from --image-root in main()
+IMAGE_SUBDIRS = {
+    "docvqa": "DocVQA",
+    "textvqa": "textvqa/train_images",
+    "infographicsvqa": "infographicsvqa/infographicsvqa_images",
+    "gqa": "gqa/images",
+    "chartqa": "ChartQA/images",
 }
 # Patch-28 budget = the q25-7b RL training budget (256 / 576 token equiv).
 MIN_PIXELS = 200704
@@ -82,6 +82,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--pool", required=True)
     ap.add_argument("--model-path", default="Qwen/Qwen2.5-VL-7B-Instruct")
+    ap.add_argument("--image-root", default=os.environ.get("DATASET_ROOT", "datasets"),
+                    help="parent of the per-dataset image folders")
     ap.add_argument("--out", required=True)
     ap.add_argument("--shard-idx", type=int, default=0)
     ap.add_argument("--num-shards", type=int, default=1)
@@ -89,6 +91,10 @@ def main():
     ap.add_argument("--max-new-tokens", type=int, default=512)
     ap.add_argument("--temperature", type=float, default=1.0)
     args = ap.parse_args()
+
+    global IMAGE_ROOTS
+    IMAGE_ROOTS = {ds: os.path.join(args.image_root, sub)
+                   for ds, sub in IMAGE_SUBDIRS.items()}
 
     rows = [json.loads(l) for l in open(args.pool)]
     # Dedup by (dataset, basename, question); stable sort so the shard split is

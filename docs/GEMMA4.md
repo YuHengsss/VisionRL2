@@ -33,10 +33,11 @@ Training writes a **twig delta** (`twig_delta_final.pt`, ~1.4 GB). Turn it into 
 checkpoint with `qwen_src/gemma4_unified/assemble_full_checkpoint.py --delta <pt> --out <dir>`,
 which merges the delta onto the base snapshot (the `-full` directory the scripts expect).
 
-## Stage 1: Phase-A at tier 560 on the v4mix corpus
+## Stage 1: Phase-A at tier 560
 
-`scripts/train_sdrpn_gemma4.sh`. The corpus is the Qwen "v4mix" row set regenerated **by
-Gemma itself** at tier 560, in two prompt styles:
+`scripts/train_sdrpn_gemma4.sh`. The corpus is the 50k VisualCoT candidate set answered
+**by Gemma itself** at tier 560, in two prompt styles (released as
+`sdrpn_corpora/gemma4_12b_response_corpus.jsonl`, so `START=train` skips this step):
 
 | rows | datasets | image | decode | labels |
 |---|---|---|---|---|
@@ -52,7 +53,7 @@ recall 0.83, precision 0.90.
 Pool: `data_prep/build_pool_gemma4.sh` runs Gemma's **own** pre-RL filter over VisualCoT
 (drop gqa/chartqa, gold boxes above 10% of the image dropped, `peak_ratio` with peak fraction
 0.3 and ratio 3.0 - the same extraction the trainer uses - `R = 6`, retention 0.2), then
-`make_filtered_v2.py` composes 5,000 infographicsvqa + 1,000 textvqa + 1,000 docvqa.
+`compose_pool.py` composes 5,000 infographicsvqa + 1,000 textvqa + 1,000 docvqa.
 Evidence responses come from the frozen base model at tier 560, and the evidence attention
 maps are cached from layers {11, 17, 23, 29, 35, 41}.
 

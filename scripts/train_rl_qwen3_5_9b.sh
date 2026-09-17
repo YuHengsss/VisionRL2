@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Region-level RL on Qwen3.5-9B (paper checkpoint: q9b-placebo100-s42-full).
 export PHASE_A_CKPT=${PHASE_A_CKPT:-output/sdrpn/qwen3_5-9b-sdrpn-K21T3-online}
-export FILTERED_JSONL=${FILTERED_JSONL:-data/rl_pools/filtered_v2_evmaps_9b.jsonl}
+export FILTERED_JSONL=${FILTERED_JSONL:-data/VisionRL2-data/rl_pools/rl_pool_qwen3_5_9b.jsonl}
+export EV_MAPS_ROOT=${EV_MAPS_ROOT:-data/ev_maps}
 export DATASET_ROOT=${DATASET_ROOT:-datasets}
 export GPU_IDS=${GPU_IDS:-0,1,2,3}
 export RUN_NAME=${RUN_NAME:-qwen3_5-9b-rl}

@@ -23,9 +23,17 @@
 # "dataset" selects the image root (see IMAGE_ROOT below and the
 # DEFAULT_IMAGE_ROOTS map in qwen_src/gemma4_unified/gemma_stage1_gen.py).
 #
-#   IMAGE_ROOT=datasets INPUT_V1=data/sdrpn/gemma4_v4mix_input_v1.jsonl \
-#   INPUT_V2=data/sdrpn/gemma4_v4mix_input_v2.jsonl GPU_IDS=0,1 \
+#   IMAGE_ROOT=datasets INPUT_V1=data/sdrpn/gemma4_candidates_v1.jsonl \
+#   INPUT_V2=data/sdrpn/gemma4_candidates_v2.jsonl GPU_IDS=0,1 \
 #     bash scripts/train_sdrpn_gemma4.sh
+#
+# The generated corpus is released, so the gen + merge stages can be skipped
+# entirely: point TRAIN_JSONL at it (the default) and start at `train`:
+#
+#   IMAGE_ROOT=datasets START=train GPU_IDS=0,1 bash scripts/train_sdrpn_gemma4.sh
+#
+# The INPUT_V1 / INPUT_V2 candidate halves (needed only for START=gen) are
+# produced by `python data_prep/split_candidates.py --gemma-style ...`.
 # =============================================================================
 set -euo pipefail
 CODE_ROOT=${CODE_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}
@@ -40,7 +48,7 @@ IMAGE_ROOT=${IMAGE_ROOT:-datasets}                 # parent of the per-dataset i
 CORPUS_DIR=${CORPUS_DIR:-data/sdrpn/gemma4_v4mix}  # generated responses land here
 INPUT_V1=${INPUT_V1:-${CORPUS_DIR}/input_v1.jsonl}
 INPUT_V2=${INPUT_V2:-${CORPUS_DIR}/input_v2.jsonl}
-TRAIN_JSONL=${TRAIN_JSONL:-${CORPUS_DIR}/gemma12b_it_560_v4mix_train.jsonl}
+TRAIN_JSONL=${TRAIN_JSONL:-data/VisionRL2-data/sdrpn_corpora/gemma4_12b_response_corpus.jsonl}
 OUT_DIR=${OUT_DIR:-output/sdrpn/gemma4-12b-roi-K27T3-stage1-v4mix}
 OUT_FULL=${OUT_FULL:-${OUT_DIR}-full}
 GPU_IDS=${GPU_IDS:-0,1}

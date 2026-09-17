@@ -21,11 +21,11 @@ plus a pool jsonl copy (shard-suffixed) with an added ``ev_maps_path`` field.
 
 Usage (shardable across GPUs):
   CUDA_VISIBLE_DEVICES=0 python excluded/multi_group/build_evidence_map_cache_q25_7b.py \
-      --pool output/region_level_grpo/qwen3_5-4b-roi-K21T3-stage1-online-stripped-prompt/filtered_v2.jsonl \
+      --pool data/rl_pools/qwen2_5_vl_7b/pool/pool.jsonl \
       --model-path Qwen/Qwen2.5-VL-7B-Instruct \
       --responses output/region_level_grpo/phase_a_v2_responses/pool_evidence_q25_7b.jsonl \
       --cache-dir output/region_level_grpo/ev_maps_cache_q25_7b \
-      --out-pool output/region_level_grpo/filtered_v2_evmaps_q25_7b.jsonl \
+      --out-pool data/rl_pools/qwen2_5_vl_7b/rl_pool.jsonl \
       --shard-id 0 --shard-count 4
 """
 from __future__ import annotations
@@ -48,25 +48,28 @@ from transformers import AutoProcessor, Qwen2_5_VLForConditionalGeneration
 from transformers.models.qwen2_5_vl.modeling_qwen2_5_vl import (
     apply_multimodal_rotary_pos_emb, repeat_kv)
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 for p in (PROJECT_ROOT, PROJECT_ROOT / "qwen-vl-finetune"):
     if str(p) not in sys.path:
         sys.path.insert(0, str(p))
 
 from qwen_src.qwen3_5.online_single_region_label import single_region_roi_label
 
-DS_IMAGE_ROOTS = {
-    "textvqa": "/home/yuheng/datasets/textvqa/train_images",
-    "docvqa": "/home/yuheng/datasets/DocVQA",
-    "infographicsvqa": "/home/yuheng/datasets/infographicsvqa/infographicsvqa_images",
-    "gqa": "/home/yuheng/datasets/gqa/images",
-    "ChartQA": "/home/yuheng/datasets/ChartQA/images",
-    "dude": "/home/yuheng/datasets/dude_images",
+# Per-dataset image sub-folders under the dataset root (same mapping as
+# qwenvl/train/region_level_grpo/dataset.py).
+DS_IMAGE_SUBDIRS = {
+    "textvqa": "textvqa/train_images",
+    "docvqa": "DocVQA",
+    "infographicsvqa": "infographicsvqa/infographicsvqa_images",
+    "gqa": "gqa/images",
+    "chartqa": "ChartQA/images",
 }
-_RLG = os.environ.get("RLG_DATA_BASE")
-if _RLG:
-    DS_IMAGE_ROOTS = {k: v.replace("/home/yuheng/datasets", _RLG)
-                      for k, v in DS_IMAGE_ROOTS.items()}
+DS_IMAGE_ROOTS = {}   # filled from --image-root in main()
+
+
+def _resolve_image_roots(image_root: str) -> dict:
+    return {ds: os.path.join(image_root, sub)
+            for ds, sub in DS_IMAGE_SUBDIRS.items()}
 
 LAYERS = [18, 19, 20, 21, 22, 23]
 MIN_PIXELS = 200704
@@ -202,6 +205,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--pool", required=True)
     ap.add_argument("--model-path", default="Qwen/Qwen2.5-VL-7B-Instruct")
+    ap.add_argument("--image-root", default=os.environ.get("DATASET_ROOT", "datasets"),
+                    help="parent of the per-dataset image folders")
     ap.add_argument("--responses", required=True, help="comma-sep jsonls")
     ap.add_argument("--cache-dir", required=True)
     ap.add_argument("--out-pool", required=True, help="shard suffix auto-added")
@@ -212,6 +217,8 @@ def main():
     args = ap.parse_args()
 
     layers = [int(x) for x in args.layers.split(",")]
+    global DS_IMAGE_ROOTS
+    DS_IMAGE_ROOTS = _resolve_image_roots(args.image_root)
     cache_dir = Path(args.cache_dir)
     cache_dir.mkdir(parents=True, exist_ok=True)
 

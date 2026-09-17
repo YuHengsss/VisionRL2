@@ -3,27 +3,47 @@
 Items deliberately deferred from the code-branching pass (2026-09-02). None of them
 block training/eval with locally prepared data + checkpoints.
 
-## 1. Data release (HF)
-- [ ] Upload the RL pools + evidence-map caches (3 x 7k rows; jsonl ~4-8 MB each,
-      `ev_maps_cache_*` ~54 MB each) and make the `scripts/train_rl_*.sh` default paths point at them:
-      `filtered_v2_evmaps_4b.jsonl`, `filtered_v2_evmaps_9b.jsonl`,
-      `filtered_v2_evmaps_q25_7b_ordered.jsonl` (+ `ev_maps_cache_{4b,9b,q25_7b}/`).
-- [ ] Upload the SD-RPN online-training corpora `qwen35_{4b,9b}_vcot50k_MIX.jsonl` (58 MB each)
-      and document the VisualCoT image layout expected under `DATASET_ROOT`.
-- [ ] `data_prep/` is included as-is from the research tree; it still needs:
-      - `pre_rl_filter.py` depends on the inference wrapper `qzoom_demo/qzoom_wrapper.py`
-        (not included) -> either vendor the wrapper or re-implement the reward-std ranking on
-        top of `reward_model.py`.
-      - hard-coded CityU paths in `run_cache_*.sh`, `run_gen_evidence_q25_7b.sh`,
-        `run_make_vcot50k_response_qwen35.sh`.
-      - the MIX-corpus builder (v1/v2 tagging of the response corpus) is not in the tree.
-- [ ] Write `docs/DATA.md` (corpus format, image roots, how the 7k pool was selected:
-      top-50% per-sample reward-std within each split, 5k infographics + 1k textvqa + 1k docvqa).
-- [ ] Gemma-4-12B data: upload the v4mix stage-1 input corpora (`input_v1.jsonl` gqa+textvqa,
-      `input_v2.jsonl` docvqa+infographicsvqa) and the generated response corpus
-      `gemma12b_it_560_v4mix_train.jsonl` (49,498 rows), plus the Gemma RL pool
-      `filtered_v2_evmaps_gemma.jsonl` + `ev_maps_cache/` and make
-      `data_prep/build_pool_gemma4.sh` / `scripts/train_sdrpn_gemma4.sh` defaults point at them.
+## 1. Data release (HF) - DONE 2026-09-17
+
+Published as [`iwantmorepaper/VisionRL2-data`](https://huggingface.co/datasets/iwantmorepaper/VisionRL2-data)
+(public dataset repo, ~304 MB, 13 files). The `YuHengsss` namespace was not writable by the
+logged-in token, so the data sits under `iwantmorepaper` for now; re-uploading it under
+`YuHengsss/VisionRL2-data` later only needs the links in `README.md`, `docs/`, the script
+defaults and the dataset card updated.
+
+- [x] RL pools + evidence-map caches for all four backbones
+      (`rl_pools/rl_pool_{qwen3_5_4b,qwen3_5_9b,qwen2_5_vl_7b,gemma4_12b}.jsonl`,
+      `ev_maps/ev_maps_*.tar`, 7,000 rows / 7,000 cache files each). Pool rows are
+      sanitised: trainer-read keys only, no `p_ref_path`, `ev_maps_path` rewritten to
+      `ev_maps_<backbone>/<sample_id>.pt`. `scripts/train_rl_*.sh` default to them with
+      `EV_MAPS_ROOT=data/ev_maps`.
+- [x] SD-RPN corpora (`sdrpn_corpora/qwen3_5_{4b,9b}_response_corpus.jsonl`,
+      `gemma4_12b_response_corpus.jsonl`) + the 50k candidate set
+      (`rl_pools/candidates_visualcot_50k.jsonl`); VisualCoT image layout documented in the
+      dataset card and in README "Data".
+- [x] `data_prep/` regenerates every released file:
+      - `qwen_heatmap.py` (in `region_level_grpo/`) replaces the external
+        `qzoom_demo.qzoom_wrapper` dependency; `pre_rl_filter.py` dispatches on
+        `--model-family` and keeps the wrapper only as an opt-in `--heatmap-runner`.
+      - `build_corpus_qwen3_5.sh` + `split_candidates.py` are the missing MIX/merge step
+        (two prompt styles, `version` tag, empty-response drop).
+      - `build_pool_qwen3_5.sh` / `build_pool_qwen2_5_vl.sh` replace `run_cache_4b.sh`,
+        `run_cache_q25_7b.sh`, `run_gen_evidence_q25_7b.sh`,
+        `run_make_vcot50k_response_qwen35.sh` (all deleted); `make_filtered_v2.py` is now
+        `compose_pool.py` with a required `--stats-dir`.
+      - no absolute CityU paths remain in `data_prep/` (image roots come from
+        `DATASET_ROOT` via the `DS_IMAGE_ROOTS` mapping).
+- [x] The corpus / pool schema and the `EV_MAPS_ROOT` convention are documented in the
+      dataset card and README "Data" (a separate `docs/DATA.md` was not needed).
+
+Open follow-ups:
+- [ ] Smoke the new `data_prep` drivers on a GPU box (only `bash -n` / `py_compile` so far) -
+      in particular `QwenHeatmapRunner` vs the original wrapper on a handful of samples.
+- [ ] Regenerated Qwen corpora carry a `version` field that the released files do not
+      (the Qwen stage-1 loader derives the style from the dataset tag, so it is inert).
+- [ ] The released `rl_pool_qwen2_5_vl_7b.jsonl` reuses the Qwen3.5-4B row selection
+      (its evidence maps are 7B-native). Decide whether to also publish a genuinely
+      7B-selected pool from `build_pool_qwen2_5_vl.sh START=filter`.
 
 ## 2. Checkpoint release (HF)
 - [ ] SD-RPN (Phase-A) checkpoints: `qwen3_5-4b ... v4mix-jun2`, `qwen3_5-9b ... v4mix-jun4`,

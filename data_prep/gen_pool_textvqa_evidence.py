@@ -1,6 +1,6 @@
 """Generate [Visual Evidence] responses for the textvqa samples of an RL pool.
 
-The 7k RL pool (filtered_v2.jsonl) has 1000 textvqa samples whose cached v2
+The 7k RL pool has 1000 textvqa samples whose stage-1 corpus
 responses use the single-word suffix (not the evidence format). This script
 regenerates ONLY those textvqa pool samples with the VISUAL_EVIDENCE_SUFFIX
 prompt, at the RL training pixel budget (@576), so the multi-layer
@@ -10,7 +10,7 @@ Keyed by (dataset, image basename, question) to match the cache step's join.
 
 Usage (per family):
   CUDA_VISIBLE_DEVICES=1,2,3 python excluded/multi_group/gen_pool_textvqa_evidence.py \
-      --pool output/region_level_grpo/qwen3_5-4b-roi-K21T3-stage1-online-stripped-prompt/filtered_v2.jsonl \
+      --pool <pool dir>/pool.jsonl \
       --model-path Qwen/Qwen3.5-4B \
       --out output/region_level_grpo/phase_a_v2_responses/pool_textvqa_evidence_4b.jsonl
 """
@@ -27,7 +27,7 @@ import torch
 from PIL import Image
 from transformers import AutoProcessor
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
 VISUAL_EVIDENCE_SUFFIX = (
@@ -35,7 +35,7 @@ VISUAL_EVIDENCE_SUFFIX = (
     "answering. Use tags of [Visual Evidence] before listing and [Answer] "
     "before answering."
 )
-TEXTVQA_ROOT = "/home/yuheng/datasets/textvqa/train_images"
+TEXTVQA_SUBDIR = "textvqa/train_images"
 MIN_PIXELS = 262144
 MAX_PIXELS = 589824
 SYSTEM = "You are a helpful assistant."
@@ -54,7 +54,10 @@ def main():
     ap.add_argument("--pool", required=True)
     ap.add_argument("--model-path", required=True)
     ap.add_argument("--out", required=True)
-    ap.add_argument("--image-root", default=TEXTVQA_ROOT)
+    ap.add_argument("--image-root",
+                    default=os.path.join(
+                        os.environ.get("DATASET_ROOT", "datasets"), TEXTVQA_SUBDIR),
+                    help="TextVQA train_images folder")
     ap.add_argument("--batch-size", type=int, default=8)
     ap.add_argument("--max-new-tokens", type=int, default=512)
     args = ap.parse_args()

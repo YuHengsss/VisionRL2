@@ -21,9 +21,9 @@ training image preprocessing (pool feat_hw is non-square → no square pad).
 
 Usage (per family, shardable across GPUs):
   CUDA_VISIBLE_DEVICES=1 python excluded/multi_group/build_evidence_map_cache.py \
-      --pool .../filtered_v2.jsonl --model-path Qwen/Qwen3.5-4B \
+      --pool <pool dir>/pool.jsonl --model-path Qwen/Qwen3.5-4B \
       --responses .../qwen35_4b_vcot50k_v2.jsonl,.../pool_textvqa_evidence_4b.jsonl \
-      --cache-dir .../ev_maps_cache_4b --out-pool .../filtered_v2_evmaps_4b.jsonl \
+      --cache-dir <out>/ev_maps_cache --out-pool <out>/rl_pool.jsonl \
       --shard-id 0 --shard-count 3
 """
 from __future__ import annotations
@@ -39,7 +39,7 @@ import torch
 from PIL import Image
 from transformers import AutoProcessor
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 for p in (PROJECT_ROOT, PROJECT_ROOT / "qwen-vl-finetune"):
     if str(p) not in sys.path:
         sys.path.insert(0, str(p))
@@ -50,11 +50,21 @@ from qwen_src.qwen3_5.online_attention import (
     register_grounding_cache, compute_response_to_image_attention)
 from qwen_src.qwen3_5.online_single_region_label import single_region_roi_label
 
-DS_IMAGE_ROOTS = {
-    "textvqa": "/home/yuheng/datasets/textvqa/train_images",
-    "docvqa": "/home/yuheng/datasets/DocVQA",
-    "infographicsvqa": "/home/yuheng/datasets/infographicsvqa/infographicsvqa_images",
+# Per-dataset image sub-folders under the dataset root (same mapping as
+# qwenvl/train/region_level_grpo/dataset.py).
+DS_IMAGE_SUBDIRS = {
+    "textvqa": "textvqa/train_images",
+    "docvqa": "DocVQA",
+    "infographicsvqa": "infographicsvqa/infographicsvqa_images",
+    "gqa": "gqa/images",
+    "chartqa": "ChartQA/images",
 }
+DS_IMAGE_ROOTS = {}   # filled from --image-root in main()
+
+
+def _resolve_image_roots(image_root: str) -> dict:
+    return {ds: os.path.join(image_root, sub)
+            for ds, sub in DS_IMAGE_SUBDIRS.items()}
 LAYERS = [7, 11, 15, 19, 23, 27]
 MIN_PIXELS = 262144
 MAX_PIXELS = 589824
@@ -85,6 +95,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--pool", required=True)
     ap.add_argument("--model-path", required=True)
+    ap.add_argument("--image-root", default=os.environ.get("DATASET_ROOT", "datasets"),
+                    help="parent of the per-dataset image folders")
     ap.add_argument("--responses", required=True, help="comma-sep jsonls")
     ap.add_argument("--cache-dir", required=True)
     ap.add_argument("--out-pool", required=True, help="shard suffix auto-added")
@@ -95,6 +107,8 @@ def main():
     args = ap.parse_args()
 
     layers = [int(x) for x in args.layers.split(",")]
+    global DS_IMAGE_ROOTS
+    DS_IMAGE_ROOTS = _resolve_image_roots(args.image_root)
     cache_dir = Path(args.cache_dir)
     cache_dir.mkdir(parents=True, exist_ok=True)
 

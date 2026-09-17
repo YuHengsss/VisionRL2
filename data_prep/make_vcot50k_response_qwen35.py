@@ -61,12 +61,15 @@ import torch
 from PIL import Image
 from tqdm import tqdm
 
-### Please list the related raw visual evidence in the image before answering. Use tags of [Visual Evidence] before listing and [Answer] before answering.
+# Per-dataset image folders under DATASET_ROOT (default "datasets"); override
+# any subset with --image-root-map "gqa=/abs/path,docvqa=/abs/path".
+_DATASET_ROOT = os.environ.get("DATASET_ROOT", "datasets")
 DEFAULT_IMAGE_ROOTS: Dict[str, List[str]] = {
-    "textvqa": ["/home/yuheng/datasets/textvqa/train_images"],
-    "docvqa": ["/home/yuheng/datasets/DocVQA"],
-    "infographicsvqa": ["/home/yuheng/datasets/infographicsvqa/infographicsvqa_images"],
-    "gqa": ["/home/yuheng/datasets/gqa/images"],
+    "textvqa": [os.path.join(_DATASET_ROOT, "textvqa/train_images")],
+    "docvqa": [os.path.join(_DATASET_ROOT, "DocVQA")],
+    "infographicsvqa": [os.path.join(_DATASET_ROOT,
+                                     "infographicsvqa/infographicsvqa_images")],
+    "gqa": [os.path.join(_DATASET_ROOT, "gqa/images")],
 }
 
 
@@ -77,6 +80,13 @@ GQA_BBOX_SUFFIX = (
     "use JSON. Follow this exact format: "
     "x_min y_min x_max y_max {detail_label}."
 )
+VISUAL_EVIDENCE_SUFFIX = (
+    "Please list the related raw visual evidence in the image before "
+    "answering. Use tags of [Visual Evidence] before listing and [Answer] "
+    "before answering."
+)
+
+# Prompt style "v1": short-answer / bbox task suffixes (gqa + textvqa rows).
 TASK_PROMPT_SUFFIX: Dict[str, str] = {
     "textvqa": "Answer the question using a single word or phrase.",
     "ocrvqa": "Answer the question using a single word or phrase.",
@@ -85,10 +95,23 @@ TASK_PROMPT_SUFFIX: Dict[str, str] = {
     "gqa": GQA_BBOX_SUFFIX,
 }
 
+PROMPT_STYLES = ("v1", "v2")
 
-def build_prompted_question(question: str, dataset: str) -> str:
-    suffix = TASK_PROMPT_SUFFIX.get(dataset, "")
+
+def build_prompted_question(question: str, dataset: str,
+                            style: str = "v1") -> str:
+    """Prompt for one row.
+
+    ``style="v1"`` applies the per-dataset task suffix (gqa -> bounding boxes,
+    textvqa -> single word or phrase, doc/infographics -> none). ``style="v2"``
+    applies the ``[Visual Evidence] ... [Answer]`` evidence prompt instead -
+    the style the docvqa / infographicsvqa half of the corpus was generated
+    with, whose responses drive the single-region pseudo-labels.
+    """
     q = question.strip()
+    if str(style) == "v2":
+        return f"{q} {VISUAL_EVIDENCE_SUFFIX}"
+    suffix = TASK_PROMPT_SUFFIX.get(dataset, "")
     return f"{q} {suffix}" if suffix else q
 
 
@@ -163,9 +186,10 @@ def _load_one(
     return img, "ok"
 
 
-def _build_prompt(rec: dict, processor, enable_thinking: bool) -> Tuple[str, str]:
+def _build_prompt(rec: dict, processor, enable_thinking: bool,
+                  prompt_style: str = "v1") -> Tuple[str, str]:
     ds = rec.get("dataset", "")
-    prompted_q = build_prompted_question(rec["question"], ds)
+    prompted_q = build_prompted_question(rec["question"], ds, prompt_style)
     messages = [{"role": "user", "content": [
         {"type": "image"},
         {"type": "text", "text": prompted_q},
@@ -206,6 +230,7 @@ def iter_loaded_chunks(
     chunk_size: int,
     num_workers: int,
     enable_thinking: bool,
+    prompt_style: str = "v1",
 ) -> Iterable[List[Sample]]:
     miss = 0
     fail = 0
@@ -233,7 +258,8 @@ def iter_loaded_chunks(
                 miss += int(status == "miss")
                 fail += int(status == "fail")
                 continue
-            prompt, prompted_q = _build_prompt(rec, processor, enable_thinking)
+            prompt, prompted_q = _build_prompt(
+                rec, processor, enable_thinking, prompt_style)
             chunk_samples.append(Sample(rec=rec, image=img, prompt=prompt,
                                         prompted_question=prompted_q))
         if chunk_samples:
@@ -245,10 +271,14 @@ def iter_loaded_chunks(
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--input-jsonl",
-                    default="/home/yuheng/datasets/visual_cot_jsonl/vcot50k_source.jsonl")
+                    default="data/VisionRL2-data/rl_pools/"
+                            "candidates_visualcot_50k.jsonl")
     ap.add_argument("--output-jsonl", required=True,
                     help="One file per shard; the launcher wires the shard suffix.")
     ap.add_argument("--image-root-map", default=None)
+    ap.add_argument("--prompt-style", choices=list(PROMPT_STYLES), default="v1",
+                    help="v1 = per-dataset task suffix (gqa bbox / textvqa "
+                         "single word); v2 = [Visual Evidence] evidence prompt")
     ap.add_argument("--model-path", default="Qwen/Qwen3.5-9B")
     ap.add_argument("--patch-size", type=int, default=32,
                     help="32 for Qwen3.5/Qwen3-VL, 28 for Qwen2.5-VL.")
@@ -351,6 +381,7 @@ def main() -> None:
         "min_tokens": args.min_tokens,
         "max_tokens": args.max_tokens,
         "expand2square": not args.no_expand2square,
+        "prompt_style": args.prompt_style,
         "temperature": args.temperature,
         "max_new_tokens": args.max_new_tokens,
         "shard_id": args.shard_id,
@@ -382,6 +413,7 @@ def main() -> None:
             chunk_size=args.chunk_size,
             num_workers=args.num_loader_workers,
             enable_thinking=args.enable_thinking,
+            prompt_style=args.prompt_style,
         ),
         depth=args.prefetch_depth,
     )
