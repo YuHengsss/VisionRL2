@@ -110,7 +110,7 @@ class GemmaStage1Dataset(Dataset):
         self,
         jsonl_path: str,
         processor,
-        image_root: str = "/home/yuheng/datasets",
+        image_root: str = "datasets",
         tier: int = 560,
         max_samples: int = -1,
         shuffle_seed: Optional[int] = 42,

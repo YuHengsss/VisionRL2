@@ -19,7 +19,7 @@ checkpoint directory:
 
 Usage:
   python assemble_full_checkpoint.py --delta .../twig_delta_final.pt \
-      --out /scratch/li96/ys2699/yh/output_factorial/gemma4-12b-roi-K27T3-stage1-full
+      --out output/sdrpn/gemma4-12b-roi-K27T3-stage1-full
 """
 from __future__ import annotations
 
@@ -36,7 +36,10 @@ MODEL_GLOB = "models--google--gemma-4-12B-it/snapshots/*"
 
 
 def find_snapshot() -> str:
-    cache = os.environ.get("HUGGINGFACE_HUB_CACHE", "/scratch/li96/ys2699/yh/hf_cache")
+    cache = os.environ.get("HUGGINGFACE_HUB_CACHE")
+    if not cache:
+        from huggingface_hub import constants
+        cache = constants.HF_HUB_CACHE
     cands = sorted(glob.glob(os.path.join(cache, MODEL_GLOB)))
     cands = [c for c in cands if os.path.exists(os.path.join(c, "config.json"))]
     if not cands:

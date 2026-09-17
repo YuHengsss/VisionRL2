@@ -32,11 +32,11 @@ from PIL import Image
 from tqdm import tqdm
 
 DEFAULT_IMAGE_ROOTS: Dict[str, List[str]] = {
-    "textvqa": ["/home/yuheng/datasets/textvqa/train_images"],
-    "docvqa": ["/home/yuheng/datasets/DocVQA"],
-    "infographicsvqa": ["/home/yuheng/datasets/infographicsvqa/infographicsvqa_images"],
-    "gqa": ["/home/yuheng/datasets/gqa/images"],
-    "ocrvqa": ["/home/yuheng/datasets/ocr_vqa/images"],
+    "textvqa": ["datasets/textvqa/train_images"],
+    "docvqa": ["datasets/DocVQA"],
+    "infographicsvqa": ["datasets/infographicsvqa/infographicsvqa_images"],
+    "gqa": ["datasets/gqa/images"],
+    "ocrvqa": ["datasets/ocr_vqa/images"],
 }
 
 GQA_BBOX_SUFFIX = (
