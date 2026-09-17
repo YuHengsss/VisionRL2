@@ -9,6 +9,8 @@
 #
 #   MODEL=qwen3_5 CHECKPOINT=<rl ckpt dir> CAP=576 bash scripts/aligned_eval.sh    # ours
 #   MODEL=qwen3_5 CHECKPOINT=Qwen/Qwen3.5-4B BASE=1 CAP=576 bash scripts/aligned_eval.sh
+#
+# Gemma-4-12B (encoder-free tiers) uses scripts/aligned_eval_gemma4.sh instead.
 # =============================================================================
 set -euo pipefail
 CODE_ROOT=${CODE_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}

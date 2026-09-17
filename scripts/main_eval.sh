@@ -11,6 +11,8 @@
 #   MODEL=qwen3_5   CHECKPOINT=Qwen/Qwen3.5-4B BASE=1 bash scripts/main_eval.sh   # base model row
 #   MODEL=qwen2_5_vl CHECKPOINT=<rl ckpt dir>      bash scripts/main_eval.sh
 #
+# Gemma-4-12B (encoder-free tiers) uses scripts/main_eval_gemma4.sh instead.
+#
 # Ours = two-stage RoI inference (peak-ratio region gate, crop budget 384 tokens,
 # sparse visual encoding of the crop); BASE=1 = the frozen MLLM, single pass.
 # =============================================================================
@@ -23,7 +25,7 @@ MODEL=${MODEL:-qwen3_5}                    # qwen3_5 | qwen2_5_vl
 CHECKPOINT=${CHECKPOINT:?set CHECKPOINT=<dir or HF id>}
 BASE=${BASE:-0}
 GPU_IDS=${GPU_IDS:-0,1,2,3}
-TASKS=${TASKS:-"vstar_bench_vopd zoombench_vopd hrbench4k_vopd hrbench8k_vopd mme_realworld mme_realworld_cn"}
+TASKS=${TASKS:-"vstar_bench_vopd zoombench_vopd hrbench4k_vopd hrbench8k_vopd mmerealworld mmerealworld_cn"}
 OUT_ROOT=${OUT_ROOT:-logs/main_eval/$(basename "${CHECKPOINT}")$([ "${BASE}" = 1 ] && echo _base)}
 JUDGE_MODEL=${JUDGE_MODEL:-Qwen/Qwen3.5-9B}
 

@@ -57,3 +57,12 @@ per sample (source + crop) used for the x-axis of Fig. 5 are logged per sample i
 
 Qwen2.5-VL-7B uses 28×28-pixel tokens (limit = cap × 784 pixels), Qwen3.5 uses 32×32
 (cap × 1024); both scripts handle this through `MODEL=`.
+
+## 3. Gemma-4-12B-it
+
+Gemma-4 is encoder-free: the visual budget is a discrete soft-token tier
+(70 / 140 / 280 / 560 / 1120), not a pixel range, so it has its own pair of entry points,
+`scripts/main_eval_gemma4.sh` and `scripts/aligned_eval_gemma4.sh`. Both protocols above are
+otherwise unchanged (prompts, decode budgets, scoring); the source tier is 1120 and the arms
+are selected with `BASE=1` / `ROI_MODE=dense` (SD-RPN) / `ROI_MODE=sparse` (Vision-RL²,
+default). See `docs/GEMMA4.md` for the tier and crop-budget rules.
