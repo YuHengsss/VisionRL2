@@ -51,8 +51,8 @@ Open follow-ups:
       `YuhengSSS/VisionRL2-Qwen2.5-VL-7B` (full directories, frozen backbone + trained twig).
 - [ ] Gemma-4-12B: SD-RPN `gemma4-12b-sdrpn-K27T3(-delta)` still to publish. The RL run
       (kappa 1.0) lives in the public repo `YuhengSSS/VisionRL2-Gemma-4-12B`
-      (full 24 GB directory, sanitised `config.json`); the weight upload is in progress as of
-      2026-09-18. For stage 1, publish the twig-only
+      (full 24 GB directory, sanitised `config.json`; weights uploaded and verified
+      2026-09-18, 25.3 GB `model.safetensors`). For stage 1, publish the twig-only
       delta (`twig_delta_final.pt`, ~1.4 GB) reassembled by
       `qwen_src/gemma4_unified/assemble_full_checkpoint.py` rather than a full directory.
 - [ ] Decide whether to publish twig-only deltas (`tools/compress_twig.py` format, ~0.6-1.4 GB)
