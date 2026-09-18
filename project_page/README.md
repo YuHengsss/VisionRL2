@@ -2,9 +2,9 @@
 
 Static, single-page site (Bulma + inline CSS/JS, bilingual EN/中文).
 
-**Live at <https://yuhengsss.github.io/VisionRL2/>.** This repository is private, so the page is
-deployed by copying `index.html` and `assets/` (not `tools/` or this README) into `VisionRL2/` of
-the public `YuHengsss/YuHengsss.github.io` repository; its Jekyll build copies them verbatim
+**Live at <https://yuhengsss.github.io/VisionRL2/>.** The page is deployed by copying
+`index.html` and `assets/` (not `tools/` or this README) into `VisionRL2/` of the
+`YuHengsss/YuHengsss.github.io` repository; its Jekyll build copies them verbatim
 (no front matter). Re-deploy after editing the page by repeating that copy and pushing.
 
 ```
@@ -51,8 +51,9 @@ The page ships these two cases, indexed in the order they are passed here, so
 
 Deep link to a stage for QA: `index.html#live?case=<i>&step=<0..6>`.
 
-## Before the page goes public
+## Release state
 
-- Authors, affiliations and the BibTeX author list are filled in; the arXiv link is still a
-  placeholder (`href="#"` on the arXiv button).
-- Replace the "coming soon" checkpoint cells with the Hugging Face links.
+- Authors, affiliations, the BibTeX entry and the arXiv button all point at
+  [arXiv:2609.19745](https://arxiv.org/abs/2609.19745) (filled 2026-09-18).
+- The Vision-RL2 checkpoint cells link to the Hugging Face repos; the SD-RPN (stage-1)
+  cells stay "coming soon" until those checkpoints are published.

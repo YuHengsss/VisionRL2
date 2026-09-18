@@ -1,6 +1,7 @@
 # Evaluation protocols
 
-Every number in the paper is produced with one of the two protocols below; both run through
+Every number in the paper ([arXiv:2609.19745](https://arxiv.org/abs/2609.19745)) is produced
+with one of the two protocols below; both run through
 the bundled `lmms-eval` fork. Ours rows use two-stage RoI inference (peak-ratio region gate on
 the SD-RPN heatmap, RoI crop with sparse visual encoding); base rows are the frozen MLLM in a
 single pass. The two protocols use different limits, prompts and scoring and are not comparable

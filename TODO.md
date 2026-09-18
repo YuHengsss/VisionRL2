@@ -46,12 +46,13 @@ Open follow-ups:
 - [ ] SD-RPN (stage-1) checkpoints: `qwen3_5-4b-sdrpn-K21T3`, `qwen3_5-9b-sdrpn-K21T3`,
       `qwen2_5vl-7b-sdrpn-K18T3`.
 - [x] RL (stage-2) checkpoints for Qwen3.5-4B (kappa 1.25), Qwen3.5-9B (kappa 1.0) and
-      Qwen2.5-VL-7B (kappa 1.0) - published 2026-09-17 as private HF model repos
-      `YuhengSSS/VisionRL2-Qwen3.5-4B`, `YuhengSSS/VisionRL2-Qwen3.5-9B`,
+      Qwen2.5-VL-7B (kappa 1.0) - published 2026-09-17, made public 2026-09-18 as the HF
+      model repos `YuhengSSS/VisionRL2-Qwen3.5-4B`, `YuhengSSS/VisionRL2-Qwen3.5-9B`,
       `YuhengSSS/VisionRL2-Qwen2.5-VL-7B` (full directories, frozen backbone + trained twig).
 - [ ] Gemma-4-12B: SD-RPN `gemma4-12b-sdrpn-K27T3(-delta)` still to publish. The RL run
-      (kappa 1.0) is published as the private repo `YuhengSSS/VisionRL2-Gemma-4-12B`
-      (full 24 GB directory, sanitised `config.json`). For stage 1, publish the twig-only
+      (kappa 1.0) lives in the public repo `YuhengSSS/VisionRL2-Gemma-4-12B`
+      (full 24 GB directory, sanitised `config.json`); the weight upload is in progress as of
+      2026-09-18. For stage 1, publish the twig-only
       delta (`twig_delta_final.pt`, ~1.4 GB) reassembled by
       `qwen_src/gemma4_unified/assemble_full_checkpoint.py` rather than a full directory.
 - [ ] Decide whether to publish twig-only deltas (`tools/compress_twig.py` format, ~0.6-1.4 GB)
@@ -66,7 +67,8 @@ Open follow-ups:
 - [ ] `x_supp.tex` (hyper-parameters): control-margin scale is kappa=1.25 for Qwen3.5-4B and
       kappa=1.0 for BOTH Qwen3.5-9B and Qwen2.5-VL-7B (the shipped 7B checkpoint is the
       kappa=1.0 run, which also won the 7B kappa sweep). Gemma-4-12B also uses kappa=1.0.
-- [ ] Fill the arXiv id / link in `README.md`, `project_page/index.html` and the BibTeX blocks.
+- [x] Fill the arXiv id / link in `README.md`, `project_page/index.html` and the BibTeX blocks -
+      done 2026-09-18 (arXiv:2609.19745, <https://arxiv.org/abs/2609.19745>).
 
 ## 5. Verification log (to keep updated)
 - [x] 2026-09-02 RL smoke run (Qwen3.5-4B, 64 samples, 4 steps, seed 42, 2 GPUs): release
@@ -97,7 +99,9 @@ Open follow-ups:
       been run on them so far - smoke each one on a GPU box before the public release.
 
 ## Project page (project_page/)
-- [ ] Fill authors / affiliations / arXiv / BibTeX before release (`TODO(release)` in index.html)
-- [ ] Replace "coming soon" checkpoint cells with HF links
+- [x] Fill authors / affiliations / arXiv / BibTeX before release (done 2026-09-18)
+- [x] Replace "coming soon" checkpoint cells with HF links (Vision-RL2 column linked; the
+      SD-RPN stage-1 cells stay "coming soon" until those checkpoints are published)
 - [x] Page deployed at <https://yuhengsss.github.io/VisionRL2/> (copied into `VisionRL2/` of
-      the public `YuHengsss.github.io` repo, since this repository is private)
+      the `YuHengsss.github.io` repo, which is how the page is served; re-copy
+      `project_page/index.html` there after every page edit)
