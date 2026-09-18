@@ -4,7 +4,7 @@
 
 ### Region-Level Policy Optimization for Fine-grained MLLM Perception
 
-[arXiv] &nbsp;|&nbsp; [Project page](https://yuhengsss.github.io/VisionRL2/)
+[arXiv](https://arxiv.org/abs/2609.19745) &nbsp;|&nbsp; [Project page](https://yuhengsss.github.io/VisionRL2/)
 
 <img src="project_page/assets/teaser_all.png" width="100%">
 
@@ -12,6 +12,17 @@
 
 ## Updates
 
+- **Sep. 18, 2026** &mdash; Paper on arXiv: [arXiv:2609.19745](https://arxiv.org/abs/2609.19745)
+  ([PDF](https://arxiv.org/pdf/2609.19745)). The code is public at
+  [`YuHengsss/VisionRL2`](https://github.com/YuHengsss/VisionRL2), and the Vision-RL²
+  checkpoints for all four backbones
+  ([Qwen3.5-4B](https://huggingface.co/YuhengSSS/VisionRL2-Qwen3.5-4B),
+  [Qwen3.5-9B](https://huggingface.co/YuhengSSS/VisionRL2-Qwen3.5-9B),
+  [Qwen2.5-VL-7B](https://huggingface.co/YuhengSSS/VisionRL2-Qwen2.5-VL-7B),
+  [Gemma-4-12B](https://huggingface.co/YuhengSSS/VisionRL2-Gemma-4-12B))
+  together with the training data
+  ([`YuhengSSS/VisionRL2-data`](https://huggingface.co/datasets/YuhengSSS/VisionRL2-data))
+  are on Hugging Face.
 - **Sep. 2026** &mdash; Training data released: SD-RPN corpora, the 7k RL pools and the
   evidence-map caches for all four backbones
   ([`YuhengSSS/VisionRL2-data`](https://huggingface.co/datasets/YuhengSSS/VisionRL2-data)),
@@ -220,7 +231,7 @@ and [docs/GEMMA4.md](docs/GEMMA4.md).
 | [Qwen2.5-VL-7B](https://huggingface.co/Qwen/Qwen2.5-VL-7B-Instruct) | K = 18, T = 3 | TBA | [VisionRL2-Qwen2.5-VL-7B](https://huggingface.co/YuhengSSS/VisionRL2-Qwen2.5-VL-7B) |
 | [Gemma-4-12B-it](https://huggingface.co/google/gemma-4-12B-it) | K = 27, T = 3 | TBA | [VisionRL2-Gemma-4-12B](https://huggingface.co/YuhengSSS/VisionRL2-Gemma-4-12B) |
 
-The stage-2 (Vision-RL²) repositories are private for now and hold full model directories
+The stage-2 (Vision-RL²) repositories are public and hold full model directories
 (frozen backbone + trained twig): download one and pass its path as `CHECKPOINT` to
 `scripts/main_eval*.sh` / `scripts/aligned_eval*.sh`. The SD-RPN (stage-1) checkpoints follow.
 
@@ -237,7 +248,7 @@ Only the twig is trained, so a checkpoint can also be published as a twig-only d
 @article{shi2026visionrl2,
   title   = {Region-Level Policy Optimization for Fine-grained MLLM Perception},
   author  = {Shi, Yuheng and Pei, Xiaohuan and Dong, Minjing and Xu, Chang},
-  journal = {arXiv preprint},
+  journal = {arXiv preprint arXiv:2609.19745},
   year    = {2026}
 }
 
