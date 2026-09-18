@@ -43,6 +43,7 @@ Open follow-ups:
       7B-selected pool from `build_pool_qwen2_5_vl.sh START=filter`.
 
 ## 2. Checkpoint release (HF)
+- [x] HF collection gathering the four RL checkpoints + the dataset: https://huggingface.co/collections/YuhengSSS/visionrl2
 - [ ] SD-RPN (stage-1) checkpoints: `qwen3_5-4b-sdrpn-K21T3`, `qwen3_5-9b-sdrpn-K21T3`,
       `qwen2_5vl-7b-sdrpn-K18T3`.
 - [x] RL (stage-2) checkpoints for Qwen3.5-4B (kappa 1.25), Qwen3.5-9B (kappa 1.0) and

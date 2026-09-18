@@ -4,7 +4,7 @@
 
 ### Region-Level Policy Optimization for Fine-grained MLLM Perception
 
-[arXiv](https://arxiv.org/abs/2609.19745) &nbsp;|&nbsp; [Project page](https://yuhengsss.github.io/VisionRL2/)
+[arXiv](https://arxiv.org/abs/2609.19745) &nbsp;|&nbsp; [Project page](https://yuhengsss.github.io/VisionRL2/) &nbsp;|&nbsp; [Weights & Data](https://huggingface.co/collections/YuhengSSS/visionrl2)
 
 <img src="project_page/assets/teaser_all.png" width="100%">
 
@@ -15,7 +15,8 @@
 - **Sep. 18, 2026** &mdash; Paper on arXiv: [arXiv:2609.19745](https://arxiv.org/abs/2609.19745)
   ([PDF](https://arxiv.org/pdf/2609.19745)). The code is public at
   [`YuHengsss/VisionRL2`](https://github.com/YuHengsss/VisionRL2), and the Vision-RL²
-  checkpoints for all four backbones
+  checkpoints for all four backbones (gathered with the data in the
+  [Vision-RL² HF collection](https://huggingface.co/collections/YuhengSSS/visionrl2))
   ([Qwen3.5-4B](https://huggingface.co/YuhengSSS/VisionRL2-Qwen3.5-4B),
   [Qwen3.5-9B](https://huggingface.co/YuhengSSS/VisionRL2-Qwen3.5-9B),
   [Qwen2.5-VL-7B](https://huggingface.co/YuhengSSS/VisionRL2-Qwen2.5-VL-7B),
