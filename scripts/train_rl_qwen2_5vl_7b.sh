@@ -12,7 +12,7 @@ export RUN_NAME=${RUN_NAME:-qwen2_5vl-7b-rl}
 export TWIG_K=18
 export MIN_PIXELS=200704 MAX_PIXELS=451584      # 256 / 576 visual tokens (28 px patches)
 export PLACEBO_KAPPA=1.0
-export BATCH_SIZE=1 GRAD_ACCUM_STEPS=16         # effective batch 32 on 2 GPUs
+export BATCH_SIZE=${BATCH_SIZE:-1} GRAD_ACCUM_STEPS=${GRAD_ACCUM_STEPS:-16}  # effective batch 32 on 2 GPUs (bs x ga x #GPUs; keep 32 on fewer GPUs)
 export ATTN_IMPL=flash_attention_2
 
 bash "$(dirname "$0")/_rl_launch.sh"
