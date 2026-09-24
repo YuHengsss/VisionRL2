@@ -121,4 +121,5 @@ CUDA_VISIBLE_DEVICES=${GPU_IDS} torchrun \
     --online_pseudo_label True \
     --online_pseudo_label_family "${FAMILY}" \
     --online_pseudo_label_mode auto \
-    --online_single_region "$([ "${ONLINE_SINGLE_REGION}" = 1 ] && echo True || echo False)" \n    "$@"
+    --online_single_region "$([ "${ONLINE_SINGLE_REGION}" = 1 ] && echo True || echo False)" \
+    "$@"
