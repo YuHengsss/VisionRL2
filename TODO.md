@@ -67,8 +67,8 @@ Open follow-ups:
       plus a loader, or full checkpoints - resolved: full checkpoints everywhere, plus the
       Gemma delta as an extra file in its repo.
 - [x] Fill the checkpoint table in README with the HF ids (both columns done 2026-09-24).
-- [ ] Add the four `SDRPN-*` repos to the HF collection by hand - the release token gets a 403
-      on the collections API.
+- [x] (2026-09-24) The four `SDRPN-*` repos are in the HF collection (added by hand; the release
+      token gets a 403 on the collections API).
 
 ## 3. Demo
 - [ ] Gradio RoI visualizer (`launch_compare.sh` in the research tree) — port to the
