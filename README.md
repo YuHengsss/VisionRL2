@@ -114,15 +114,24 @@ produced with.
 # Qwen3.5 (4B / 9B): transformers 5.6, torch 2.7, flash-attn 2.8, flash-linear-attention
 conda create -n visionrl2 python=3.10 -y && conda activate visionrl2
 pip install -r requirements.txt && pip install -e lmms-eval
+# The two CUDA extensions are built against the torch installed above, so they go second and
+# without build isolation. They need nvcc >= 11.6 on PATH; point CUDA_HOME at a matching
+# toolkit if the system default is older (export CUDA_HOME=/usr/local/cuda-12.8 PATH=$CUDA_HOME/bin:$PATH).
+pip install flash-attn==2.8.3 --no-build-isolation      # or the prebuilt wheel for your torch/CUDA/python: https://github.com/Dao-AILab/flash-attention/releases
+pip install causal-conv1d==1.6.1 --no-build-isolation   # no prebuilt wheel for torch 2.7; the source build takes ~10 min
 
 # Qwen2.5-VL-7B: transformers 4.51, torch 2.4
 conda create -n visionrl2-q25 python=3.10 -y && conda activate visionrl2-q25
 pip install -r requirements_qwen2_5vl.txt && pip install -e lmms-eval
+pip install flash-attn==2.7.4.post1 --no-build-isolation   # or a prebuilt wheel, as above
 
 # Gemma-4-12B-it: transformers 5.15, torch 2.11, sdpa attention (no flash-attn, no DeepSpeed)
 conda create -n visionrl2-gemma python=3.11 -y && conda activate visionrl2-gemma
 pip install -r requirements_gemma4.txt && pip install -e lmms-eval
 ```
+
+The `hf` command used below is the Hugging Face CLI that `huggingface_hub` installs with the
+requirements, so run the data commands inside the activated environment.
 
 ## Data
 
