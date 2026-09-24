@@ -17,7 +17,7 @@ sentencepiece==0.2.1
 tiktoken==0.11.0
 qwen-vl-utils==0.0.10
 triton==3.0.0
-flash-attn==2.7.4.post1
+# flash-attn==2.7.4.post1   (installed second, --no-build-isolation; see README Installation)
 mathruler==0.1.0
 openai==1.101.0
 # evaluation framework (bundled fork): pip install -e lmms-eval
