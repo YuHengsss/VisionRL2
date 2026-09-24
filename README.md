@@ -12,6 +12,12 @@
 
 ## Updates
 
+- **Sep. 24, 2026** &mdash; SD-RPN (stage-1) checkpoints released for all four backbones
+  ([Qwen3.5-4B](https://huggingface.co/YuhengSSS/SDRPN-Qwen3.5-4B),
+  [Qwen3.5-9B](https://huggingface.co/YuhengSSS/SDRPN-Qwen3.5-9B),
+  [Qwen2.5-VL-7B](https://huggingface.co/YuhengSSS/SDRPN-Qwen2.5-VL-7B),
+  [Gemma-4-12B](https://huggingface.co/YuhengSSS/SDRPN-Gemma-4-12B)), so stage 1 can be skipped
+  and the RL stage started directly. Also fresh-install and eval-script fixes &mdash; please pull.
 - **Sep. 18, 2026** &mdash; Paper on arXiv: [arXiv:2609.19745](https://arxiv.org/abs/2609.19745)
   ([PDF](https://arxiv.org/pdf/2609.19745)). The code is public at
   [`YuHengsss/VisionRL2`](https://github.com/YuHengsss/VisionRL2), and the Vision-RL²
@@ -33,8 +39,8 @@
 
 ## TODO
 
-- [x] Release the Vision-RL² (stage-2) checkpoints on Hugging Face (see the table below);
-      the SD-RPN (stage-1) checkpoints follow.
+- [x] Release the SD-RPN (stage-1) and Vision-RL² (stage-2) checkpoints for all four backbones
+      on Hugging Face (see the table below).
 - [x] Release the RL pools and evidence-map caches, plus the SD-RPN training corpora
       ([`YuhengSSS/VisionRL2-data`](https://huggingface.co/datasets/YuhengSSS/VisionRL2-data)).
 - [ ] Gradio RoI visualizer ported to the release code paths.
@@ -209,9 +215,18 @@ script's extra arguments if you want intermediate ones.
 Stage 1 writes `output/sdrpn/qwen3_5-{4b,9b}-sdrpn-K21T3`; the Gemma driver trains a twig
 delta into `output/sdrpn/gemma4-12b-sdrpn-K27T3-delta` and its `assemble` stage turns that into
 the loadable `output/sdrpn/gemma4-12b-sdrpn-K27T3` (tiers, twig and crop rules:
-[docs/GEMMA4.md](docs/GEMMA4.md)). The Qwen2.5-VL-7B SD-RPN checkpoint
-(`output/sdrpn/qwen2_5vl-7b-sdrpn-K18T3`) is released as-is, so only stage 2 has to be run for
-it.
+[docs/GEMMA4.md](docs/GEMMA4.md)).
+
+All four SD-RPN (stage-1) checkpoints are released, so stage 1 can be skipped entirely: download
+them into exactly the paths the stage-2 scripts and the pool builders already default to, and every
+command below runs unchanged.
+
+```bash
+hf download YuhengSSS/SDRPN-Qwen3.5-4B    --local-dir output/sdrpn/qwen3_5-4b-sdrpn-K21T3
+hf download YuhengSSS/SDRPN-Qwen3.5-9B    --local-dir output/sdrpn/qwen3_5-9b-sdrpn-K21T3
+hf download YuhengSSS/SDRPN-Qwen2.5-VL-7B --local-dir output/sdrpn/qwen2_5vl-7b-sdrpn-K18T3
+hf download YuhengSSS/SDRPN-Gemma-4-12B   --local-dir output/sdrpn/gemma4-12b-sdrpn-K27T3
+```
 
 Each stage-2 script defaults `FILTERED_JSONL` to its released pool
 (`data/VisionRL2-data/rl_pools/rl_pool_<backbone>.jsonl`) and `EV_MAPS_ROOT` to
@@ -243,17 +258,26 @@ and [docs/GEMMA4.md](docs/GEMMA4.md).
 
 | Backbone | Twig | SD-RPN (stage 1) | Vision-RL² (stage 2) |
 |---|---|---|---|
-| [Qwen3.5-4B](https://huggingface.co/Qwen/Qwen3.5-4B) | K = 21, T = 3 | TBA | [VisionRL2-Qwen3.5-4B](https://huggingface.co/YuhengSSS/VisionRL2-Qwen3.5-4B) |
-| [Qwen3.5-9B](https://huggingface.co/Qwen/Qwen3.5-9B) | K = 21, T = 3 | TBA | [VisionRL2-Qwen3.5-9B](https://huggingface.co/YuhengSSS/VisionRL2-Qwen3.5-9B) |
-| [Qwen2.5-VL-7B](https://huggingface.co/Qwen/Qwen2.5-VL-7B-Instruct) | K = 18, T = 3 | TBA | [VisionRL2-Qwen2.5-VL-7B](https://huggingface.co/YuhengSSS/VisionRL2-Qwen2.5-VL-7B) |
-| [Gemma-4-12B-it](https://huggingface.co/google/gemma-4-12B-it) | K = 27, T = 3 | TBA | [VisionRL2-Gemma-4-12B](https://huggingface.co/YuhengSSS/VisionRL2-Gemma-4-12B) |
+| [Qwen3.5-4B](https://huggingface.co/Qwen/Qwen3.5-4B) | K = 21, T = 3 | [SDRPN-Qwen3.5-4B](https://huggingface.co/YuhengSSS/SDRPN-Qwen3.5-4B) | [VisionRL2-Qwen3.5-4B](https://huggingface.co/YuhengSSS/VisionRL2-Qwen3.5-4B) |
+| [Qwen3.5-9B](https://huggingface.co/Qwen/Qwen3.5-9B) | K = 21, T = 3 | [SDRPN-Qwen3.5-9B](https://huggingface.co/YuhengSSS/SDRPN-Qwen3.5-9B) | [VisionRL2-Qwen3.5-9B](https://huggingface.co/YuhengSSS/VisionRL2-Qwen3.5-9B) |
+| [Qwen2.5-VL-7B](https://huggingface.co/Qwen/Qwen2.5-VL-7B-Instruct) | K = 18, T = 3 | [SDRPN-Qwen2.5-VL-7B](https://huggingface.co/YuhengSSS/SDRPN-Qwen2.5-VL-7B) | [VisionRL2-Qwen2.5-VL-7B](https://huggingface.co/YuhengSSS/VisionRL2-Qwen2.5-VL-7B) |
+| [Gemma-4-12B-it](https://huggingface.co/google/gemma-4-12B-it) | K = 27, T = 3 | [SDRPN-Gemma-4-12B](https://huggingface.co/YuhengSSS/SDRPN-Gemma-4-12B) | [VisionRL2-Gemma-4-12B](https://huggingface.co/YuhengSSS/VisionRL2-Gemma-4-12B) |
 
-The stage-2 (Vision-RL²) repositories are public and hold full model directories
-(frozen backbone + trained twig): download one and pass its path as `CHECKPOINT` to
-`scripts/main_eval*.sh` / `scripts/aligned_eval*.sh`. The SD-RPN (stage-1) checkpoints follow.
+Both columns are public and hold full model directories (frozen backbone + trained twig): download
+one and pass its path as `CHECKPOINT` to `scripts/main_eval*.sh` / `scripts/aligned_eval*.sh`. The
+SD-RPN (stage-1) repositories are the initialisations the matching Vision-RL² runs start from, so
+the stage-2 and pool-building commands take them as `PHASE_A_CKPT`. Download each into the path
+those scripts already default to:
 
-Stage-1 checkpoints load from `output/sdrpn/{qwen3_5-4b-sdrpn-K21T3, qwen3_5-9b-sdrpn-K21T3,
-qwen2_5vl-7b-sdrpn-K18T3, gemma4-12b-sdrpn-K27T3}`; stage-2 runs land under `output/rl/`.
+```bash
+hf download YuhengSSS/SDRPN-Qwen3.5-4B    --local-dir output/sdrpn/qwen3_5-4b-sdrpn-K21T3
+hf download YuhengSSS/SDRPN-Qwen3.5-9B    --local-dir output/sdrpn/qwen3_5-9b-sdrpn-K21T3
+hf download YuhengSSS/SDRPN-Qwen2.5-VL-7B --local-dir output/sdrpn/qwen2_5vl-7b-sdrpn-K18T3
+hf download YuhengSSS/SDRPN-Gemma-4-12B   --local-dir output/sdrpn/gemma4-12b-sdrpn-K27T3
+```
+
+Stage-2 runs land under `output/rl/`. The Gemma repository additionally carries the twig-only
+delta it was assembled from, at `twig_delta/twig_delta_final.pt`.
 
 Only the twig is trained, so a checkpoint can also be published as a twig-only delta
 (`tools/compress_twig.py`); the Gemma stage-1 run writes such a delta natively and
