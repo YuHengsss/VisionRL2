@@ -13,11 +13,11 @@ Any subset can be overridden with ``DS_IMAGE_ROOTS="gqa=/abs/path,docvqa=..."``.
 """
 import os
 
-# --- Q-Zoom centralized env-knob accessor (Phase A) ---
+# --- Vision-RL2 centralized env-knob accessor ---
 try:
-    from qwen_src.qzoom_config import getenv as qz_getenv
+    from qwen_src.visionrl2_config import getenv as qz_getenv
 except ImportError:  # pragma: no cover
-    from qzoom_config import getenv as qz_getenv
+    from visionrl2_config import getenv as qz_getenv
 
 # The only dataset name accepted by ``--dataset_use``.
 ROI_DATASET_NAME = "my_roi_dataset"
