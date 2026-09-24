@@ -34,7 +34,8 @@ Published as [`YuhengSSS/VisionRL2-data`](https://huggingface.co/datasets/Yuheng
       dataset card and in `data_prep/README.md` (a separate `docs/DATA.md` was not needed).
 
 Open follow-ups:
-- [ ] Smoke the new `data_prep` drivers on a GPU box (only `bash -n` / `py_compile` so far) -
+- [x] (2026-09-24) Fresh-clone smoke on CityU: README install, data download, aligned eval of the HF 4B checkpoint (V* 85.34 = ref), stage-1 30-step run, RL 20-step run, `data_prep` corpus + pool builders on a 300-row slice, main-table V* + judge (91.10 vs 91.6). Fixes pushed: missing `qwenvl.data` package, eval `set -e` trap, RL batch knobs, install recipe, pylatexenc pin.
+- [ ] (superseded by the smoke above) Smoke the new `data_prep` drivers on a GPU box (only `bash -n` / `py_compile` so far) -
       in particular `QwenHeatmapRunner` vs the original wrapper on a handful of samples.
 - [ ] Regenerated Qwen corpora carry a `version` field that the released files do not
       (the Qwen stage-1 loader derives the style from the dataset tag, so it is inert).

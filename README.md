@@ -199,6 +199,13 @@ DATASET_ROOT=datasets GPU_IDS=0,1 \
   bash scripts/train_rl_gemma4_12b.sh
 ```
 
+The stage-1 scripts assume four 48 GB GPUs; the effective batch is
+`BATCH_SIZE x GRAD_ACCUM_STEPS x #GPUs` (128 for stage 1, 32 for stage 2), so on fewer GPUs raise
+`GRAD_ACCUM_STEPS` to keep it. Stage 1 for Qwen3.5-4B is one epoch of 387 steps over the 49.5k-row
+corpus, about 32 s per step on a single A6000 at the full effective batch (roughly 3.4 h on one GPU,
+under an hour on four). The recipe saves only the final checkpoint; pass `--save_steps N` through the
+script's extra arguments if you want intermediate ones.
+
 Stage 1 writes `output/sdrpn/qwen3_5-{4b,9b}-sdrpn-K21T3`; the Gemma driver trains a twig
 delta into `output/sdrpn/gemma4-12b-sdrpn-K27T3-delta` and its `assemble` stage turns that into
 the loadable `output/sdrpn/gemma4-12b-sdrpn-K27T3` (tiers, twig and crop rules:
