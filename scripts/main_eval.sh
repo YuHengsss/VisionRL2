@@ -26,7 +26,7 @@ CHECKPOINT=${CHECKPOINT:?set CHECKPOINT=<dir or HF id>}
 BASE=${BASE:-0}
 GPU_IDS=${GPU_IDS:-0,1,2,3}
 TASKS=${TASKS:-"vstar_bench_vopd zoombench_vopd hrbench4k_vopd hrbench8k_vopd mmerealworld mmerealworld_cn"}
-OUT_ROOT=${OUT_ROOT:-logs/main_eval/$(basename "${CHECKPOINT}")$([ "${BASE}" = 1 ] && echo _base)}
+OUT_ROOT=${OUT_ROOT:-logs/main_eval/$(basename "${CHECKPOINT}")$([ "${BASE}" = 1 ] && echo _base || true)}
 JUDGE_MODEL=${JUDGE_MODEL:-Qwen/Qwen3.5-9B}
 
 case "${MODEL}" in
