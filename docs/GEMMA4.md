@@ -35,6 +35,25 @@ Training writes a **twig delta** (`twig_delta_final.pt`, ~1.4 GB) into
 delta onto the base snapshot; `scripts/train_sdrpn_gemma4.sh` runs that as its `assemble` stage
 and writes `output/sdrpn/gemma4-12b-sdrpn-K27T3`, the directory every downstream script loads.
 
+Both forms of the paper's stage-1 checkpoint are published in
+[`YuhengSSS/SDRPN-Gemma-4-12B`](https://huggingface.co/YuhengSSS/SDRPN-Gemma-4-12B): the assembled
+directory at the repo root, and the delta it was assembled from at
+`twig_delta/twig_delta_final.pt`. To skip stage 1 entirely:
+
+```bash
+hf download YuhengSSS/SDRPN-Gemma-4-12B --local-dir output/sdrpn/gemma4-12b-sdrpn-K27T3
+```
+
+or, to re-run the assemble step yourself, fetch only the delta and pass it to
+`assemble_full_checkpoint.py`:
+
+```bash
+hf download YuhengSSS/SDRPN-Gemma-4-12B twig_delta/twig_delta_final.pt --local-dir output/sdrpn
+python qwen_src/gemma4_unified/assemble_full_checkpoint.py \
+  --delta output/sdrpn/twig_delta/twig_delta_final.pt \
+  --out   output/sdrpn/gemma4-12b-sdrpn-K27T3
+```
+
 ## Stage 1: Phase-A at tier 560
 
 `scripts/train_sdrpn_gemma4.sh`. The corpus is the 50k VisualCoT candidate set answered

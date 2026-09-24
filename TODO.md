@@ -45,21 +45,30 @@ Open follow-ups:
 
 ## 2. Checkpoint release (HF)
 - [x] HF collection gathering the four RL checkpoints + the dataset: https://huggingface.co/collections/YuhengSSS/visionrl2
-- [ ] SD-RPN (stage-1) checkpoints: `qwen3_5-4b-sdrpn-K21T3`, `qwen3_5-9b-sdrpn-K21T3`,
-      `qwen2_5vl-7b-sdrpn-K18T3`.
+- [x] SD-RPN (stage-1) checkpoints - published 2026-09-24 as the public HF model repos
+      `YuhengSSS/SDRPN-Qwen3.5-4B`, `YuhengSSS/SDRPN-Qwen3.5-9B`,
+      `YuhengSSS/SDRPN-Qwen2.5-VL-7B` (full loadable directories; the 9B and 7B were
+      reassembled from their twig-only deltas onto the HF base snapshots, byte-exact against
+      the compression manifests). They download into `output/sdrpn/{qwen3_5-4b-sdrpn-K21T3,
+      qwen3_5-9b-sdrpn-K21T3, qwen2_5vl-7b-sdrpn-K18T3}`, i.e. the `PHASE_A_CKPT` defaults of
+      `scripts/train_rl_*.sh` and `data_prep/build_pool_*.sh`.
 - [x] RL (stage-2) checkpoints for Qwen3.5-4B (kappa 1.25), Qwen3.5-9B (kappa 1.0) and
       Qwen2.5-VL-7B (kappa 1.0) - published 2026-09-17, made public 2026-09-18 as the HF
       model repos `YuhengSSS/VisionRL2-Qwen3.5-4B`, `YuhengSSS/VisionRL2-Qwen3.5-9B`,
       `YuhengSSS/VisionRL2-Qwen2.5-VL-7B` (full directories, frozen backbone + trained twig).
-- [ ] Gemma-4-12B: SD-RPN `gemma4-12b-sdrpn-K27T3(-delta)` still to publish. The RL run
-      (kappa 1.0) lives in the public repo `YuhengSSS/VisionRL2-Gemma-4-12B`
+- [x] Gemma-4-12B: SD-RPN published 2026-09-24 as `YuhengSSS/SDRPN-Gemma-4-12B` - the assembled
+      24 GB directory at the repo root (sanitised `config.json`: `_name_or_path:
+      google/gemma-4-12B-it`, no local paths in `_sdrpn_meta`) AND the twig-only delta at
+      `twig_delta/twig_delta_final.pt` (~1.4 GB), so users can start from either form.
+      The RL run (kappa 1.0) lives in the public repo `YuhengSSS/VisionRL2-Gemma-4-12B`
       (full 24 GB directory, sanitised `config.json`; weights uploaded and verified
-      2026-09-18, 25.3 GB `model.safetensors`). For stage 1, publish the twig-only
-      delta (`twig_delta_final.pt`, ~1.4 GB) reassembled by
-      `qwen_src/gemma4_unified/assemble_full_checkpoint.py` rather than a full directory.
-- [ ] Decide whether to publish twig-only deltas (`tools/compress_twig.py` format, ~0.6-1.4 GB)
-      plus a loader, or full checkpoints.
-- [x] Fill the checkpoint table in README with the HF ids (stage-2 column done; stage-1 TBA).
+      2026-09-18, 25.3 GB `model.safetensors`).
+- [x] Decide whether to publish twig-only deltas (`tools/compress_twig.py` format, ~0.6-1.4 GB)
+      plus a loader, or full checkpoints - resolved: full checkpoints everywhere, plus the
+      Gemma delta as an extra file in its repo.
+- [x] Fill the checkpoint table in README with the HF ids (both columns done 2026-09-24).
+- [ ] Add the four `SDRPN-*` repos to the HF collection by hand - the release token gets a 403
+      on the collections API.
 
 ## 3. Demo
 - [ ] Gradio RoI visualizer (`launch_compare.sh` in the research tree) — port to the
@@ -102,8 +111,8 @@ Open follow-ups:
 
 ## Project page (project_page/)
 - [x] Fill authors / affiliations / arXiv / BibTeX before release (done 2026-09-18)
-- [x] Replace "coming soon" checkpoint cells with HF links (Vision-RL2 column linked; the
-      SD-RPN stage-1 cells stay "coming soon" until those checkpoints are published)
+- [x] Replace "coming soon" checkpoint cells with HF links (both columns linked as of
+      2026-09-24; no "coming soon" cell remains)
 - [x] Page deployed at <https://yuhengsss.github.io/VisionRL2/> (copied into `VisionRL2/` of
       the `YuHengsss.github.io` repo, which is how the page is served; re-copy
       `project_page/index.html` there after every page edit)
