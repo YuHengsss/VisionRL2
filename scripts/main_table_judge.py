@@ -203,8 +203,9 @@ def main():
 
     try:
         from mathruler.grader import grade_answer
-    except ImportError:
-        raise SystemExit("mathruler is required for the rule pass: pip install mathruler")
+    except ImportError as e:
+        raise SystemExit(f"the rule pass needs mathruler and its (undeclared) dependency pylatexenc: "
+                         f"pip install mathruler==0.1.0 pylatexenc==2.10  ({e})")
 
     per_bench = load_rows(a.out_dir)
     if not per_bench:
