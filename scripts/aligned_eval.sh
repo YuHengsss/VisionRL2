@@ -23,7 +23,7 @@ BASE=${BASE:-0}
 CAP=${CAP:-576}
 GPU_IDS=${GPU_IDS:-0,1,2,3}
 TASKS=${TASKS:-"vstar_bench zoombench hrbench mmerealworld_lite infovqa_val"}
-OUT_ROOT=${OUT_ROOT:-logs/aligned_eval/$(basename "${CHECKPOINT}")$([ "${BASE}" = 1 ] && echo _base)_cap${CAP}}
+OUT_ROOT=${OUT_ROOT:-logs/aligned_eval/$(basename "${CHECKPOINT}")$([ "${BASE}" = 1 ] && echo _base || true)_cap${CAP}}
 
 case "${MODEL}" in
   qwen3_5)    PPT=1024; ROPE=",roi_infer_with_rope=True" ;;
