@@ -1,7 +1,7 @@
 _import/
 output/
 logs/
-data/
+/data/
 datasets/
 __pycache__/
 *.pyc
